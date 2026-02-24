@@ -599,11 +599,12 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
         <div class="page-header"><div class="page-eyebrow"><i data-lucide="git-branch"></i> 02 — Flow</div><div class="page-title">How It Works</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="steps">
-            <div class="step"><div class="step-num">1</div><div><div class="step-title">Load the Library</div><div class="step-desc">Your script calls <code>loadstring(game:HttpGet(LIBRARY_URL))()</code> inside a <code>pcall</code> to fetch the Hub library from CDN.</div></div></div>
-            <div class="step"><div class="step-num">2</div><div><div class="step-title">Auto-Login Check</div><div class="step-desc"><code>TryAutoLogin()</code> runs first — it checks for a saved key in <code>KeyFile</code> or <code>getgenv().SCRIPT_KEY</code> and validates via Junkie SDK. If valid, the UI is skipped entirely.</div></div></div>
+            <div class="step"><div class="step-num">1</div><div><div class="step-title">Load the Library</div><div class="step-desc">Your script calls <code>loadstring(game:HttpGet("https://cdn.jnkie.com/havoc.lua"))()</code> to fetch the Hub library from CDN and assign it to <code>Hub</code>.</div></div></div>
+            <div class="step"><div class="step-num">2</div><div><div class="step-title">Auto-Login Check</div><div class="step-desc"><code>TryAutoLogin()</code> runs first — it loads the Junkie SDK, reads a saved key from <code>KeyFile</code> or <code>getgenv().SCRIPT_KEY</code>, and validates it. If valid, <code>getgenv().LOAD = true</code> is set and the UI is skipped entirely.</div></div></div>
             <div class="step"><div class="step-num">3</div><div><div class="step-title">Show UI if Needed</div><div class="step-desc">If auto-login fails, <code>Hub.new(Config)</code> and <code>hub:Init()</code> render the key system UI for the user to enter their key.</div></div></div>
-            <div class="step"><div class="step-num">4</div><div><div class="step-title">Wait for Key</div><div class="step-desc"><code>while not getgenv().SCRIPT_KEY do task.wait(0.1) end</code> blocks until a valid key is entered. Your game script runs below that line.</div></div></div>
+            <div class="step"><div class="step-num">4</div><div><div class="step-title">Wait for Load Signal</div><div class="step-desc"><code>while not getgenv().LOAD do task.wait(0.1) end</code> blocks until <code>LOAD</code> is set to <code>true</code>. The library sets this on successful key validation. Your game script runs below that line.</div></div></div>
           </div>
+          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div><strong>KEYLESS mode —</strong> If Junkie returns <code>message == "KEYLESS"</code>, the library sets <code>getgenv().SCRIPT_KEY = "KEYLESS"</code> and <code>getgenv().LOAD = true</code> without saving any key file.</div></div>
         </div></div>
       </div>
 
@@ -620,29 +621,65 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
             </div>
             <div class="cb-wrap"><div class="cb-lines">
               <div class="line-nums" id="ln-2"></div>
-<pre class="cb-pre" id="pre-2"><span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="bool">nil</span>
-
-<span class="kw">local</span> Junkie_Configs = { }
-<span class="kw">local</span> UI_Configs     = { }
+<pre class="cb-pre" id="pre-2"><span class="kw">local</span> Junkie_Configs = { }
+<span class="kw">local</span> UI_Configs = { }
 <span class="kw">local</span> Config = { }
 
-<span class="kw">local</span> Hub
-<span class="fn">pcall</span>(<span class="kw">function</span>()
-  <span class="kw">local</span> src = <span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>)
-  <span class="kw">if</span> #src &lt; <span class="num">100</span> <span class="kw">then return end</span>
-  Hub = <span class="fn">loadstring</span>(src)()
-<span class="kw">end</span>)
-<span class="kw">if</span> <span class="fn">type</span>(Hub) ~= <span class="str">"table"</span> <span class="kw">then return end</span>
+<span class="kw">local</span> Hub = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"https://cdn.jnkie.com/havoc.lua"</span>))()
 
-<span class="kw">local</span> autoLogin = TryAutoLogin()
-<span class="kw">if not</span> autoLogin <span class="kw">then</span>
+<span class="kw">local function</span> <span class="fn">hasFileSystemSupport</span>()
+  <span class="kw">local</span> hw = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(writefile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">local</span> hr = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(readfile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">local</span> hi = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(isfile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">return</span> hw <span class="kw">and</span> hr <span class="kw">and</span> hi
+<span class="kw">end</span>
+<span class="kw">local</span> fileSystemSupported = <span class="fn">hasFileSystemSupport</span>()
+<span class="kw">local</span> KeyFile = UI_Configs.KeyFile <span class="kw">or</span> <span class="str">""</span>
+
+<span class="kw">local function</span> <span class="fn">saveVerifiedKey</span>(key)
+  <span class="kw">if not</span> fileSystemSupported <span class="kw">then return false end</span>
+  <span class="kw">return</span> <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="fn">writefile</span>(KeyFile, key) <span class="kw">end</span>)
+<span class="kw">end</span>
+<span class="kw">local function</span> <span class="fn">loadVerifiedKey</span>()
+  <span class="kw">if not</span> fileSystemSupported <span class="kw">then return nil end</span>
+  <span class="kw">local</span> ok, content = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">readfile</span>(KeyFile) <span class="kw">end</span>)
+  <span class="kw">if not</span> ok <span class="kw">or not</span> content <span class="kw">or</span> content == <span class="str">""</span> <span class="kw">then return nil end</span>
+  <span class="kw">return</span> content
+<span class="kw">end</span>
+
+<span class="kw">local function</span> <span class="fn">TryAutoLogin</span>()
+  <span class="kw">if not</span> Junkie_Configs.UseJunkie <span class="kw">then return false end</span>
+  <span class="kw">local</span> lib = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"https://jnkie.com/sdk/library.lua"</span>))()
+  lib.service    = Junkie_Configs.Service
+  lib.identifier = Junkie_Configs.Identifier
+  lib.provider   = Junkie_Configs.Provider
+  <span class="kw">local</span> savedKey  = <span class="fn">loadVerifiedKey</span>()
+  <span class="kw">local</span> keyToCheck = savedKey <span class="kw">or</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span>
+  <span class="kw">if not</span> keyToCheck <span class="kw">or</span> keyToCheck == <span class="str">""</span> <span class="kw">then return false end</span>
+  <span class="kw">local</span> result = lib.<span class="fn">check_key</span>(keyToCheck)
+  <span class="kw">if</span> result <span class="kw">and</span> result.valid <span class="kw">then</span>
+    <span class="kw">if</span> result.message == <span class="str">"KEYLESS"</span> <span class="kw">then</span>
+      <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="str">"KEYLESS"</span>
+      <span class="fn">getgenv</span>().<span class="key">LOAD</span> = <span class="bool">true</span>
+    <span class="kw">else</span>
+      <span class="kw">if not</span> savedKey <span class="kw">then</span> <span class="fn">saveVerifiedKey</span>(keyToCheck) <span class="kw">end</span>
+      <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = keyToCheck
+      <span class="fn">getgenv</span>().<span class="key">LOAD</span> = <span class="bool">true</span>
+    <span class="kw">end</span>
+    <span class="kw">return true</span>
+  <span class="kw">end</span>
+  <span class="kw">return false</span>
+<span class="kw">end</span>
+
+<span class="kw">local</span> autoLoginResult = <span class="fn">TryAutoLogin</span>()
+<span class="kw">if not</span> autoLoginResult <span class="kw">then</span>
   <span class="fn">pcall</span>(<span class="kw">function</span>()
     <span class="kw">local</span> hub = Hub.<span class="fn">new</span>(Config)
     hub:<span class="fn">Init</span>()
   <span class="kw">end</span>)
 <span class="kw">end</span>
 
-<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> <span class="kw">do</span>
+<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">LOAD</span> <span class="kw">do</span>
   task.<span class="fn">wait</span>(<span class="num">0.1</span>)
 <span class="kw">end</span></pre>
             </div></div>
@@ -677,7 +714,7 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
               <tr><td class="pname">Name</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Display name on the provider button.</td></tr>
-              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for the icon. Use <code>"rbxassetid://0"</code> for the built-in default.</td></tr>
+              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for the provider icon image. e.g. <code>"rbxassetid://135475048973669"</code>.</td></tr>
               <tr><td class="pname">Url</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">URL opened on click. Fallback if <code>get_key_link()</code> returns nil.</td></tr>
               <tr><td class="pname">Show</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = visible in the UI.</td></tr>
               <tr><td class="pname">IsJunkie</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc">Exactly ONE provider should have this. Enables SDK's <code>get_key_link()</code> flow.</td></tr>
@@ -735,10 +772,10 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
               <tr><td class="pname">Name</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Hub display name in the title section.</td></tr>
               <tr><td class="pname">Version</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Version pill under the hub name. e.g. <code>"1.0"</code></td></tr>
               <tr><td class="pname">Color</td><td><span class="ptype-pill ptype-color">Color3</span></td><td class="pdesc">Primary accent colour — buttons, borders, glows, badges.</td></tr>
-              <tr><td class="pname">Text_Color</td><td><span class="ptype-pill ptype-color">Color3/""</span></td><td class="pdesc">Text on coloured buttons. Leave <code>""</code> to auto-pick black/white.</td></tr>
-              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for your hub logo in the title bar.</td></tr>
+              <tr><td class="pname">Text_Color</td><td><span class="ptype-pill ptype-color">Color3/""</span></td><td class="pdesc">Text colour on accent-coloured buttons. Leave <code>""</code> to auto-pick black or white based on <code>Color</code> brightness.</td></tr>
+              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for your hub logo displayed in the title bar. e.g. <code>"rbxassetid://12345"</code>. Leave <code>""</code> for no icon.</td></tr>
               <tr><td class="pname">BadgeText</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Badge label next to the icon. e.g. <code>"KEY SYSTEM"</code></td></tr>
-              <tr><td class="pname">CustomFont</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid of a custom font. Leave <code>""</code> for built-in Gotham.</td></tr>
+              <tr><td class="pname">CustomFont</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid of a custom font asset. Leave <code>""</code> for built-in Gotham.</td></tr>
               <tr><td class="pname">ShowOutline</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = accent-coloured border around the main panel.</td></tr>
             </tbody>
           </table>
@@ -789,13 +826,13 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
             <tbody>
               <tr><td class="pname">KeySystemLabel</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Label text above the key input box.</td></tr>
               <tr><td class="pname">KeySystemPlaceholder</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Animated placeholder that types itself when the box is empty.</td></tr>
-              <tr><td class="pname">KeyFile</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Filename used to save and reload a verified key. Leave <code>""</code> to disable.</td></tr>
+              <tr><td class="pname">KeyFile</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Filename used to save and reload a verified key. Leave <code>""</code> to disable. e.g. <code>"myhub_key.txt"</code></td></tr>
               <tr><td class="pname">CloseOnSuccess</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = UI auto-closes after successful redeem.</td></tr>
               <tr><td class="pname">SuccessMessage</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Toast shown on success. e.g. <code>"✓ Access Granted!"</code></td></tr>
             </tbody>
           </table>
-          <div class="callout tip"><div class="callout-icon"><i data-lucide="check-circle-2"></i></div><div><strong>Auto-Login —</strong> On launch the library checks <code>KeyFile</code> against the Junkie SDK. If valid, the UI is never shown.</div></div>
-          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div><strong>KEYLESS mode —</strong> If Junkie returns <code>message == "KEYLESS"</code>, the library sets <code>getgenv().SCRIPT_KEY = "KEYLESS"</code> and proceeds without saving any file.</div></div>
+          <div class="callout tip"><div class="callout-icon"><i data-lucide="check-circle-2"></i></div><div><strong>Auto-Login —</strong> <code>TryAutoLogin()</code> checks <code>KeyFile</code> on launch using the Junkie SDK. If the key is valid, <code>getgenv().LOAD = true</code> is set and the UI is never shown. The file system check (<code>hasFileSystemSupport()</code>) gracefully disables saving if the executor doesn't support it.</div></div>
+          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div><strong>LOAD flag —</strong> The script waits on <code>while not getgenv().LOAD do task.wait(0.1) end</code>. The library sets <code>getgenv().LOAD = true</code> on success. For KEYLESS mode it also sets <code>getgenv().SCRIPT_KEY = "KEYLESS"</code>.</div></div>
         </div></div>
       </div>
 
@@ -906,52 +943,184 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
             </div>
             <div class="cb-wrap"><div class="cb-lines">
               <div class="line-nums" id="ln-16"></div>
-<pre class="cb-pre" id="pre-16"><span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="bool">nil</span>
-
-<span class="kw">local</span> Junkie_Configs = {
+<pre class="cb-pre" id="pre-16"><span class="kw">local</span> Junkie_Configs = {
   <span class="key">UseJunkie</span>       = <span class="bool">true</span>,
-  <span class="key">Junkie_Webhook</span>  = <span class="str">"https://jnkie.com/api/v1/webhooks/relay/YOUR_ID/send"</span>,
+  <span class="key">Junkie_Webhook</span>  = <span class="str">""</span>,
   <span class="key">Service</span>         = <span class="str">"My Hub"</span>,
   <span class="key">Identifier</span>      = <span class="str">"1234"</span>,
   <span class="key">Provider</span>        = <span class="str">"My Hub"</span>,
-  <span class="key">MaxKeyAttempts</span>  = <span class="num">5</span>,
-  <span class="key">Premium</span>         = <span class="bool">false</span>,
   <span class="key">Providers</span> = {
-    { <span class="key">Name</span>=<span class="str">"Junkie Development"</span>, <span class="key">Url</span>=<span class="str">"https://jnkie.com/junkiehub"</span>, <span class="key">Show</span>=<span class="bool">true</span>, <span class="key">IsJunkie</span>=<span class="bool">true</span>, <span class="key">Pinned</span>=<span class="bool">true</span> },
-    { <span class="key">Name</span>=<span class="str">"Linkvertise"</span>, <span class="key">Url</span>=<span class="str">"https://linkvertise.com/yourhub"</span>, <span class="key">Show</span>=<span class="bool">true</span>, <span class="key">Pinned</span>=<span class="bool">false</span> },
+    {
+      <span class="key">Name</span>     = <span class="str">"Junkie Development"</span>,
+      <span class="key">Icon</span>     = <span class="str">"rbxassetid://135475048973669"</span>,
+      <span class="key">Url</span>      = <span class="str">"https://jnkie.com/junkiehub"</span>,
+      <span class="key">Show</span>     = <span class="bool">true</span>,
+      <span class="key">IsJunkie</span> = <span class="bool">true</span>,
+      <span class="key">Pinned</span>   = <span class="bool">true</span>,
+    },
+    {
+      <span class="key">Name</span>   = <span class="str">"Linkvertise"</span>,
+      <span class="key">Icon</span>   = <span class="str">"rbxassetid://122637139040192"</span>,
+      <span class="key">Url</span>    = <span class="str">"https://linkvertise.com/yourhub"</span>,
+      <span class="key">Show</span>   = <span class="bool">true</span>,
+      <span class="key">Pinned</span> = <span class="bool">false</span>,
+    },
   },
+  <span class="key">MaxKeyAttempts</span> = <span class="num">5</span>,
+  <span class="key">Premium</span>        = <span class="bool">false</span>,
   <span class="key">GameSupport</span> = {
-    [<span class="num">2788229376</span>] = { <span class="key">Name</span>=<span class="str">"Blox Fruits"</span>, <span class="key">Free</span>=<span class="str">"..."</span>, <span class="key">Premium</span>=<span class="str">"..."</span> },
-    <span class="key">Universal</span>    = { <span class="key">Name</span>=<span class="str">"Universal"</span>,   <span class="key">Free</span>=<span class="str">"..."</span>, <span class="key">Premium</span>=<span class="str">"..."</span> },
+    [<span class="num">2788229376</span>] = { <span class="key">Name</span> = <span class="str">"Blox Fruits"</span>, <span class="key">Free</span> = <span class="str">"https://api.jnkie.com/.../download"</span>, <span class="key">Premium</span> = <span class="str">""</span> },
+    <span class="key">Universal</span>    = { <span class="key">Name</span> = <span class="str">"Universal"</span>,   <span class="key">Free</span> = <span class="str">"https://api.jnkie.com/.../download"</span>, <span class="key">Premium</span> = <span class="str">""</span> },
   },
 }
-
 <span class="kw">local</span> UI_Configs = {
-  <span class="key">Name</span> = <span class="str">"My Hub"</span>, <span class="key">Version</span> = <span class="str">"1.0"</span>,
-  <span class="key">Color</span> = <span class="fn">Color3</span>.<span class="fn">fromRGB</span>(<span class="num">138</span>, <span class="num">43</span>, <span class="num">226</span>),
-  <span class="key">GradientAnimated</span> = <span class="bool">true</span>, <span class="key">GradientAnimationSpeed</span> = <span class="num">4</span>,
-  <span class="key">BadgeText</span> = <span class="str">"KEY SYSTEM"</span>, <span class="key">ShowOutline</span> = <span class="bool">true</span>,
-  <span class="key">KeySystemLabel</span>       = <span class="str">"Enter Key"</span>,
-  <span class="key">KeySystemPlaceholder</span> = <span class="str">"jnk-XXXXXXXXXXXXXXXX"</span>,
-  <span class="key">ShowMemberCount</span> = <span class="bool">true</span>,
-  <span class="key">SnowEnabled</span> = <span class="bool">true</span>, <span class="key">SnowDensity</span> = <span class="num">1.0</span>,
-  <span class="key">GlassOpacity</span> = <span class="num">0.18</span>, <span class="key">SlideInEnabled</span> = <span class="bool">true</span>,
-  <span class="key">BlurEnabled</span> = <span class="bool">true</span>, <span class="key">BlurSize</span> = <span class="num">30</span>, <span class="key">OverlayOpacity</span> = <span class="num">0.65</span>,
-  <span class="key">CloseOnSuccess</span> = <span class="bool">true</span>, <span class="key">SuccessMessage</span> = <span class="str">"✓ Access Granted!"</span>,
-  <span class="key">KeyFile</span> = <span class="str">"myhub_key.txt"</span>, <span class="key">Discord</span> = <span class="str">"your_invite_code"</span>,
+  <span class="key">Name</span>                   = <span class="str">"My Hub"</span>,
+  <span class="key">Version</span>                = <span class="str">"1.0"</span>,
+  <span class="key">Color</span>                  = <span class="fn">Color3</span>.<span class="fn">fromRGB</span>(<span class="num">138</span>, <span class="num">43</span>, <span class="num">226</span>),
+  <span class="key">Text_Color</span>             = <span class="str">""</span>,
+  <span class="key">GradientAnimated</span>       = <span class="bool">true</span>,
+  <span class="key">GradientAnimationSpeed</span> = <span class="num">4</span>,
+  <span class="key">Icon</span>                   = <span class="str">""</span>,
+  <span class="key">BadgeText</span>              = <span class="str">"KEY SYSTEM"</span>,
+  <span class="key">CustomFont</span>             = <span class="str">""</span>,
+  <span class="key">ShowOutline</span>            = <span class="bool">true</span>,
+  <span class="key">KeySystemLabel</span>         = <span class="str">"Enter Key"</span>,
+  <span class="key">KeySystemPlaceholder</span>   = <span class="str">"jnk-XXXXXXXXXXXXXXXX"</span>,
+  <span class="key">ShowMemberCount</span>        = <span class="bool">true</span>,
+  <span class="key">SnowEnabled</span>            = <span class="bool">true</span>,
+  <span class="key">SnowDensity</span>            = <span class="num">1.0</span>,
+  <span class="key">SnowColor</span>              = <span class="fn">Color3</span>.<span class="fn">fromRGB</span>(<span class="num">220</span>, <span class="num">235</span>, <span class="num">255</span>),
+  <span class="key">SnowSize</span>               = { <span class="key">Min</span> = <span class="num">3</span>, <span class="key">Max</span> = <span class="num">7</span> },
+  <span class="key">GlassOpacity</span>           = <span class="num">0.18</span>,
+  <span class="key">SlideInEnabled</span>         = <span class="bool">true</span>,
+  <span class="key">BlurEnabled</span>            = <span class="bool">true</span>,
+  <span class="key">BlurSize</span>               = <span class="num">30</span>,
+  <span class="key">OverlayOpacity</span>         = <span class="num">0.65</span>,
+  <span class="key">CloseOnSuccess</span>         = <span class="bool">true</span>,
+  <span class="key">SuccessMessage</span>         = <span class="str">"✓ Access Granted!"</span>,
+  <span class="key">KeyFile</span>                = <span class="str">"myhub_key.txt"</span>,
+  <span class="key">Discord</span>                = <span class="str">"yourserver"</span>,
+  <span class="key">Socials</span> = {
+    { <span class="key">Name</span> = <span class="str">"Discord"</span>,  <span class="key">Icon</span> = <span class="str">"rbxassetid://124569550333033"</span>, <span class="key">Link</span> = <span class="str">""</span>, <span class="key">Show</span> = <span class="bool">true</span>,  <span class="key">Pinned</span> = <span class="bool">true</span>  },
+    { <span class="key">Name</span> = <span class="str">"GitHub"</span>,   <span class="key">Icon</span> = <span class="str">"rbxassetid://82005505285811"</span>,  <span class="key">Link</span> = <span class="str">""</span>, <span class="key">Show</span> = <span class="bool">true</span>,  <span class="key">Pinned</span> = <span class="bool">false</span> },
+    { <span class="key">Name</span> = <span class="str">"Website"</span>,  <span class="key">Icon</span> = <span class="str">"rbxassetid://70402301072503"</span>,  <span class="key">Link</span> = <span class="str">""</span>, <span class="key">Show</span> = <span class="bool">true</span>,  <span class="key">Pinned</span> = <span class="bool">false</span> },
+  },
+  <span class="key">AppLinks</span> = {
+    { <span class="key">Name</span> = <span class="str">""</span>, <span class="key">Icon</span> = <span class="str">"rbxassetid://124569550333033"</span>, <span class="key">Link</span> = <span class="str">""</span>, <span class="key">Show</span> = <span class="bool">true</span>, <span class="key">Pinned</span> = <span class="bool">true</span> },
+  },
+  <span class="key">Instructions</span> = {
+    { <span class="key">Title</span> = <span class="str">"Open Junkie"</span>,    <span class="key">Body</span> = <span class="str">"Click Junkie Development to open your key link."</span> },
+    { <span class="key">Title</span> = <span class="str">"Complete Steps"</span>, <span class="key">Body</span> = <span class="str">"Finish all checkpoints on the Junkie page."</span>     },
+    { <span class="key">Title</span> = <span class="str">"Paste &amp; Redeem"</span>, <span class="key">Body</span> = <span class="str">"Paste your jnk- key above and hit Redeem."</span>      },
+  },
+  <span class="key">Changelog</span> = {
+    <span class="key">Show</span>     = <span class="bool">true</span>,
+    <span class="key">Title</span>    = <span class="str">"What's New"</span>,
+    <span class="key">Versions</span> = {
+      { <span class="key">Version</span> = <span class="str">"1.0"</span>, <span class="key">Date</span> = <span class="str">"Feb 2026"</span>, <span class="key">Tag</span> = <span class="str">"NEW"</span>, <span class="key">Notes</span> = { <span class="str">"Initial release"</span> } },
+    },
+  },
 }
+<span class="kw">local</span> Config = {
+  <span class="key">Name</span>                   = UI_Configs.Name,
+  <span class="key">Version</span>                = UI_Configs.Version,
+  <span class="key">Color</span>                  = UI_Configs.Color,
+  <span class="key">Text_Color</span>             = UI_Configs.Text_Color,
+  <span class="key">GradientAnimated</span>       = UI_Configs.GradientAnimated,
+  <span class="key">GradientAnimationSpeed</span> = UI_Configs.GradientAnimationSpeed,
+  <span class="key">Icon</span>                   = UI_Configs.Icon,
+  <span class="key">BadgeText</span>              = UI_Configs.BadgeText,
+  <span class="key">CustomFont</span>             = UI_Configs.CustomFont,
+  <span class="key">ShowOutline</span>            = UI_Configs.ShowOutline,
+  <span class="key">KeySystemLabel</span>         = UI_Configs.KeySystemLabel,
+  <span class="key">KeySystemPlaceholder</span>   = UI_Configs.KeySystemPlaceholder,
+  <span class="key">ShowMemberCount</span>        = UI_Configs.ShowMemberCount,
+  <span class="key">SnowEnabled</span>            = UI_Configs.SnowEnabled,
+  <span class="key">SnowDensity</span>            = UI_Configs.SnowDensity,
+  <span class="key">SnowColor</span>              = UI_Configs.SnowColor,
+  <span class="key">SnowSize</span>               = UI_Configs.SnowSize,
+  <span class="key">GlassOpacity</span>           = UI_Configs.GlassOpacity,
+  <span class="key">SlideInEnabled</span>         = UI_Configs.SlideInEnabled,
+  <span class="key">BlurEnabled</span>            = UI_Configs.BlurEnabled,
+  <span class="key">BlurSize</span>               = UI_Configs.BlurSize,
+  <span class="key">OverlayOpacity</span>         = UI_Configs.OverlayOpacity,
+  <span class="key">CloseOnSuccess</span>         = UI_Configs.CloseOnSuccess,
+  <span class="key">SuccessMessage</span>         = UI_Configs.SuccessMessage,
+  <span class="key">KeyFile</span>                = UI_Configs.KeyFile,
+  <span class="key">Discord</span>                = UI_Configs.Discord,
+  <span class="key">Socials</span>                = UI_Configs.Socials,
+  <span class="key">AppLinks</span>               = UI_Configs.AppLinks,
+  <span class="key">Instructions</span>           = UI_Configs.Instructions,
+  <span class="key">Changelog</span>              = UI_Configs.Changelog,
+  <span class="key">UseJunkie</span>              = Junkie_Configs.UseJunkie,
+  <span class="key">Junkie_Webhook</span>         = Junkie_Configs.Junkie_Webhook,
+  <span class="key">Junkie</span> = {
+    <span class="key">Service</span>    = Junkie_Configs.Service,
+    <span class="key">Identifier</span> = Junkie_Configs.Identifier,
+    <span class="key">Provider</span>   = Junkie_Configs.Provider,
+  },
+  <span class="key">Providers</span>      = Junkie_Configs.Providers,
+  <span class="key">MaxKeyAttempts</span> = Junkie_Configs.MaxKeyAttempts,
+  <span class="key">Premium</span>        = Junkie_Configs.Premium,
+  <span class="key">GameSupport</span>    = Junkie_Configs.GameSupport,
+}
+<span class="kw">local</span> Hub = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"https://cdn.jnkie.com/havoc.lua"</span>))()
 
-<span class="kw">local</span> Hub
-<span class="fn">pcall</span>(<span class="kw">function</span>()
-  <span class="kw">local</span> src = <span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>)
-  <span class="kw">if</span> #src &lt; <span class="num">100</span> <span class="kw">then return end</span>
-  Hub = <span class="fn">loadstring</span>(src)()
-<span class="kw">end</span>)
-<span class="kw">if</span> <span class="fn">type</span>(Hub) ~= <span class="str">"table"</span> <span class="kw">then return end</span>
+<span class="kw">local function</span> <span class="fn">hasFileSystemSupport</span>()
+  <span class="kw">local</span> hw = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(writefile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">local</span> hr = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(readfile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">local</span> hi = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">type</span>(isfile) == <span class="str">"function"</span> <span class="kw">end</span>)
+  <span class="kw">return</span> hw <span class="kw">and</span> hr <span class="kw">and</span> hi
+<span class="kw">end</span>
+<span class="kw">local</span> fileSystemSupported = <span class="fn">hasFileSystemSupport</span>()
+<span class="kw">local</span> KeyFile = UI_Configs.KeyFile <span class="kw">or</span> <span class="str">""</span>
 
-<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> <span class="kw">do</span> task.<span class="fn">wait</span>(<span class="num">0.1</span>) <span class="kw">end</span>
+<span class="kw">local function</span> <span class="fn">saveVerifiedKey</span>(key)
+  <span class="kw">if not</span> fileSystemSupported <span class="kw">then return false end</span>
+  <span class="kw">return</span> <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="fn">writefile</span>(KeyFile, key) <span class="kw">end</span>)
+<span class="kw">end</span>
+<span class="kw">local function</span> <span class="fn">loadVerifiedKey</span>()
+  <span class="kw">if not</span> fileSystemSupported <span class="kw">then return nil end</span>
+  <span class="kw">local</span> ok, content = <span class="fn">pcall</span>(<span class="kw">function</span>() <span class="kw">return</span> <span class="fn">readfile</span>(KeyFile) <span class="kw">end</span>)
+  <span class="kw">if not</span> ok <span class="kw">or not</span> content <span class="kw">or</span> content == <span class="str">""</span> <span class="kw">then return nil end</span>
+  <span class="kw">return</span> content
+<span class="kw">end</span>
 
-<span class="kw">return</span> Hub</pre>
+<span class="kw">local function</span> <span class="fn">TryAutoLogin</span>()
+  <span class="kw">if not</span> Junkie_Configs.UseJunkie <span class="kw">then return false end</span>
+  <span class="kw">local</span> lib = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"https://jnkie.com/sdk/library.lua"</span>))()
+  lib.service    = Junkie_Configs.Service
+  lib.identifier = Junkie_Configs.Identifier
+  lib.provider   = Junkie_Configs.Provider
+  <span class="kw">local</span> savedKey   = <span class="fn">loadVerifiedKey</span>()
+  <span class="kw">local</span> keyToCheck = savedKey <span class="kw">or</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span>
+  <span class="kw">if not</span> keyToCheck <span class="kw">or</span> keyToCheck == <span class="str">""</span> <span class="kw">then return false end</span>
+  <span class="kw">local</span> result = lib.<span class="fn">check_key</span>(keyToCheck)
+  <span class="kw">if</span> result <span class="kw">and</span> result.valid <span class="kw">then</span>
+    <span class="kw">if</span> result.message == <span class="str">"KEYLESS"</span> <span class="kw">then</span>
+      <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="str">"KEYLESS"</span>
+      <span class="fn">getgenv</span>().<span class="key">LOAD</span>       = <span class="bool">true</span>
+    <span class="kw">else</span>
+      <span class="kw">if not</span> savedKey <span class="kw">then</span> <span class="fn">saveVerifiedKey</span>(keyToCheck) <span class="kw">end</span>
+      <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = keyToCheck
+      <span class="fn">getgenv</span>().<span class="key">LOAD</span>       = <span class="bool">true</span>
+    <span class="kw">end</span>
+    <span class="kw">return true</span>
+  <span class="kw">end</span>
+  <span class="kw">return false</span>
+<span class="kw">end</span>
+
+<span class="kw">local</span> autoLoginResult = <span class="fn">TryAutoLogin</span>()
+<span class="kw">if not</span> autoLoginResult <span class="kw">then</span>
+  <span class="fn">pcall</span>(<span class="kw">function</span>()
+    <span class="kw">local</span> hub = Hub.<span class="fn">new</span>(Config)
+    hub:<span class="fn">Init</span>()
+  <span class="kw">end</span>)
+<span class="kw">end</span>
+
+<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">LOAD</span> <span class="kw">do</span>
+  task.<span class="fn">wait</span>(<span class="num">0.1</span>)
+<span class="kw">end</span></pre>
             </div></div>
           </div>
         </div></div>
@@ -1075,6 +1244,14 @@ pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:
                 <div class="gen-field">
                   <label class="gen-label"><i data-lucide="message-circle"></i>Discord Invite Code</label>
                   <input class="gen-input" id="g-discord" type="text" placeholder="yourserver">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="image"></i>Hub Icon (rbxassetid)</label>
+                  <input class="gen-input" id="g-icon" type="text" placeholder="rbxassetid://12345 or leave blank">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="type"></i>Custom Font (rbxassetid)</label>
+                  <input class="gen-input" id="g-customfont" type="text" placeholder="rbxassetid://12345 or leave blank">
                 </div>
                 <div class="gen-field">
                   <label class="gen-label"><i data-lucide="key-square"></i>Key Label</label>
@@ -1431,8 +1608,8 @@ function makeDraggable(containerEl, dataArr, renderFn) {
 }
 
 let providersData = [
-  { name: 'Junkie Development', url: 'https://jnkie.com/junkiehub', show: true, isJunkie: true, pinned: true },
-  { name: 'Linkvertise', url: '', show: true, isJunkie: false, pinned: false },
+  { name: 'Junkie Development', icon: 'rbxassetid://135475048973669', url: 'https://jnkie.com/junkiehub', show: true, isJunkie: true, pinned: true },
+  { name: 'Linkvertise',        icon: 'rbxassetid://122637139040192', url: '', show: true, isJunkie: false, pinned: false },
 ];
 
 function renderProvidersEditor() {
@@ -1442,6 +1619,7 @@ function renderProvidersEditor() {
       <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
       <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
         <input class="gen-input" style="padding:7px 9px;font-size:13px" type="text" placeholder="Provider name" value="${esc(p.name)}" oninput="providersData[${i}].name=this.value">
+        <input class="gen-input" style="padding:7px 9px;font-family:var(--mono);font-size:11px" type="text" placeholder="rbxassetid://..." value="${esc(p.icon||'')}" oninput="providersData[${i}].icon=this.value">
         <input class="gen-input" style="padding:7px 9px;font-family:var(--mono);font-size:11px" type="text" placeholder="URL" value="${esc(p.url)}" oninput="providersData[${i}].url=this.value">
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex-shrink:0">
@@ -1534,9 +1712,20 @@ const SOCIAL_ICONS = {
 };
 
 let socialsData = [
-  { name:'Discord', assetId:'124569550333033', show:true, pinned:true, link:'' },
-  { name:'GitHub',  assetId:'82005505285811',  show:true, pinned:false, link:'' },
-  { name:'Website', assetId:'70402301072503',  show:true, pinned:false, link:'' },
+  { name:'Discord',   assetId:'124569550333033', show:true,  pinned:true,  link:'' },
+  { name:'Twitter',   assetId:'109973626472548', show:true,  pinned:false, link:'' },
+  { name:'YouTube',   assetId:'127161245916650', show:true,  pinned:false, link:'' },
+  { name:'TikTok',    assetId:'104709330704441', show:false, pinned:false, link:'' },
+  { name:'Instagram', assetId:'125560586243942', show:false, pinned:false, link:'' },
+  { name:'Telegram',  assetId:'103666565087375', show:false, pinned:false, link:'' },
+  { name:'Reddit',    assetId:'116113713008550', show:false, pinned:false, link:'' },
+  { name:'GitHub',    assetId:'82005505285811',  show:true,  pinned:false, link:'' },
+  { name:'Guilded',   assetId:'90800592251672',  show:false, pinned:false, link:'' },
+  { name:'Patreon',   assetId:'111058338249202', show:false, pinned:false, link:'' },
+  { name:'Ko-fi',     assetId:'117795089880308', show:false, pinned:false, link:'' },
+  { name:'Twitch',    assetId:'88799126886971',  show:false, pinned:false, link:'' },
+  { name:'V3rm',      assetId:'135908787183979', show:false, pinned:false, link:'' },
+  { name:'Website',   assetId:'70402301072503',  show:true,  pinned:false, link:'' },
 ];
 
 function renderSocialsEditor() {
@@ -1733,22 +1922,24 @@ function generateCode() {
 }
 
 function buildOutput() {
-  const name       = v('g-name')     || 'My Hub';
-  const ver        = v('g-ver')      || '1.0';
-  const service    = v('g-service')  || name;
-  const ident      = v('g-ident')    || '1234';
-  const provider   = v('g-provider') || name;
-  const webhook    = v('g-webhook')  || '';
-  const attempts   = v('g-attempts') || '5';
-  const keyfile    = v('g-keyfile')  || 'myhub_key.txt';
-  const badge      = v('g-badge')    || 'KEY SYSTEM';
-  const discord    = v('g-discord')  || '';
-  const keylabel   = v('g-keylabel') || 'Enter Key';
-  const keyph      = v('g-keyph')    || 'jnk-XXXXXXXXXXXXXXXX';
-  const success    = v('g-success')  || '✓ Access Granted!';
-  const gradspeed  = v('g-gradspeed')|| '4';
-  const glass      = v('g-glass')    || '0.18';
-  const blur       = v('g-blur')     || '30';
+  const name       = v('g-name')       || 'My Hub';
+  const ver        = v('g-ver')        || '1.0';
+  const service    = v('g-service')    || name;
+  const ident      = v('g-ident')      || '1234';
+  const provider   = v('g-provider')   || name;
+  const webhook    = v('g-webhook')    || '';
+  const attempts   = v('g-attempts')   || '5';
+  const keyfile    = v('g-keyfile')    || 'myhub_key.txt';
+  const badge      = v('g-badge')      || 'KEY SYSTEM';
+  const discord    = v('g-discord')    || '';
+  const icon       = v('g-icon')       || '';
+  const customfont = v('g-customfont') || '';
+  const keylabel   = v('g-keylabel')   || 'Enter Key';
+  const keyph      = v('g-keyph')      || 'jnk-XXXXXXXXXXXXXXXX';
+  const success    = v('g-success')    || '✓ Access Granted!';
+  const gradspeed  = v('g-gradspeed')  || '4';
+  const glass      = v('g-glass')      || '0.18';
+  const blur       = v('g-blur')       || '30';
   const r = parseInt(v('g-r'))||138, g = parseInt(v('g-g'))||43, b = parseInt(v('g-b'))||226;
   const snow     = chk('g-snow')     ? 'true':'false';
   const gradient = chk('g-gradient') ? 'true':'false';
@@ -1759,138 +1950,196 @@ function buildOutput() {
   const closeok  = chk('g-close')    ? 'true':'false';
   const premium  = chk('g-premium')  ? 'true':'false';
 
-  const providersStr = providersData.map(p =>
-    `    { Name = "${q(p.name)}", Url = "${q(p.url)}", Show = ${p.show}, IsJunkie = ${p.isJunkie}, Pinned = ${p.pinned} },`
-  ).join('\n');
-
-  let gameSupportStr = gameEntries.map(g => {
-    const keyStr = g.id && !isNaN(g.id) ? `[${g.id}]` : 'Universal';
-    return `    ${keyStr} = { Name = "${q(g.name||'Game')}", Free = "${q(g.free)}", Premium = "${q(g.premium)}" },`;
+  const providersStr = providersData.map(p => {
+    const junkieLine = p.isJunkie ? `\n\t\tIsJunkie = true,` : '';
+    return `\t{\n\t\tName     = "${q(p.name)}",\n\t\tIcon     = "${q(p.icon||'rbxassetid://0')}",\n\t\tUrl      = "${q(p.url)}",\n\t\tShow     = ${p.show},${junkieLine}\n\t\tPinned   = ${p.pinned},\n\t},`;
   }).join('\n');
-  gameSupportStr += `\n    Universal = { Name = "Universal", Free = "", Premium = "" },`;
+
+  const gameRows = gameEntries.filter(g2 => g2.id && !isNaN(g2.id)).map(g2 =>
+    `\t[${g2.id}] = {\n\t\tName    = "${q(g2.name)}",\n\t\tFree    = "${q(g2.free)}",\n\t\tPremium = "${q(g2.premium)}",\n\t},`
+  ).join('\n');
+  const gameSupportStr = (gameRows ? gameRows + '\n' : '') +
+    `\tUniversal = {\n\t\tName    = "Universal",\n\t\tFree    = "",\n\t\tPremium = "",\n\t},`;
 
   const socialsStr = socialsData.map(s =>
-    `    { Name = "${q(s.name)}", Icon = "rbxassetid://${s.assetId}", Link = "${q(s.link)}", Show = ${s.show}, Pinned = ${s.pinned} },`
+    `\t{ Name = "${q(s.name)}", Icon = "rbxassetid://${q(s.assetId||'0')}", Link = "${q(s.link)}", Show = ${s.show}, Pinned = ${s.pinned} },`
   ).join('\n');
 
   const applinksStr = appLinksData.map(a =>
-    `    { Name = "${q(a.name)}", Icon = "rbxassetid://0", Link = "${q(a.link)}", Show = ${a.show}, Pinned = ${a.pinned} },`
+    `\t{ Name = "${q(a.name)}", Icon = "rbxassetid://0", Link = "${q(a.link)}", Show = ${a.show}, Pinned = ${a.pinned} },`
   ).join('\n');
 
-  const instrStr = instrRows.map(r =>
-    `    { Title = "${q(r.title)}", Body = "${q(r.body)}" },`
+  const instrStr = instrRows.map(r2 =>
+    `\t{ Title = "${q(r2.title)}", Body = "${q(r2.body)}" },`
   ).join('\n');
 
   const clStr = clVersions.map(cv => {
-    const notesStr = cv.notes.map(n => `"${q(n)}"`).join(', ');
-    return `      { Version = "${q(cv.version)}", Date = "${q(cv.date)}", Tag = "${q(cv.tag)}", Notes = { ${notesStr} } },`;
+    const notesStr = (cv.notes||[]).map(n => `\t\t\t"${q(n)}",`).join('\n');
+    return `\t\t{\n\t\t\tVersion = "${q(cv.ver||cv.version||'')}",\n\t\t\tDate    = "${q(cv.date)}",\n\t\t\tTag     = "${q(cv.tag)}",\n\t\t\tNotes   = {\n${notesStr}\n\t\t\t},\n\t\t},`;
   }).join('\n');
 
+  const iconVal  = icon       ? `"${q(icon)}"`       : `""`;
+  const fontVal  = customfont ? `"${q(customfont)}"` : `""`;
+
   const code =
-`getgenv().SCRIPT_KEY = nil
-
-local Junkie_Configs = {
-  UseJunkie       = true,
-  Junkie_Webhook  = "${q(webhook)}",
-  Service         = "${q(service)}",
-  Identifier      = "${q(ident)}",
-  Provider        = "${q(provider)}",
-  MaxKeyAttempts  = ${attempts},
-  Premium         = ${premium},
-  Providers = {
+`local Junkie_Configs = {
+\tUseJunkie       = true,
+\tJunkie_Webhook  = "${q(webhook)}",
+\tService         = "${q(service)}",
+\tIdentifier      = "${q(ident)}",
+\tProvider        = "${q(provider)}",
+\tProviders = {
 ${providersStr}
-  },
-  GameSupport = {
+\t},
+\tMaxKeyAttempts  = ${attempts},
+\tPremium         = ${premium},
+\tGameSupport = {
 ${gameSupportStr}
-  },
+\t},
 }
-
 local UI_Configs = {
-  Name                 = "${q(name)}",
-  Version              = "${q(ver)}",
-  Color                = Color3.fromRGB(${r}, ${g}, ${b}),
-  GradientAnimated     = ${gradient},
-  GradientAnimationSpeed = ${gradspeed},
-  BadgeText            = "${q(badge)}",
-  ShowOutline          = ${outline},
-  KeySystemLabel       = "${q(keylabel)}",
-  KeySystemPlaceholder = "${q(keyph)}",
-  ShowMemberCount      = ${members},
-  SnowEnabled          = ${snow},
-  SnowDensity          = 1.0,
-  SnowColor            = Color3.fromRGB(220, 235, 255),
-  SnowSize             = { Min = 3, Max = 7 },
-  GlassOpacity         = ${glass},
-  SlideInEnabled       = ${slidein},
-  BlurEnabled          = ${bluren},
-  BlurSize             = ${blur},
-  OverlayOpacity       = 0.65,
-  CloseOnSuccess       = ${closeok},
-  SuccessMessage       = "${q(success)}",
-  KeyFile              = "${q(keyfile)}",
-  Discord              = "${q(discord)}",
-  Socials = {
+\tName                   = "${q(name)}",
+\tVersion                = "${q(ver)}",
+\tColor                  = Color3.fromRGB(${r}, ${g}, ${b}),
+\tText_Color             = "",
+\tGradientAnimated       = ${gradient},
+\tGradientAnimationSpeed = ${gradspeed},
+\tIcon                   = ${iconVal},
+\tBadgeText              = "${q(badge)}",
+\tCustomFont             = ${fontVal},
+\tShowOutline            = ${outline},
+\tKeySystemLabel         = "${q(keylabel)}",
+\tKeySystemPlaceholder   = "${q(keyph)}",
+\tShowMemberCount        = ${members},
+\tSnowEnabled            = ${snow},
+\tSnowDensity            = 1.0,
+\tSnowColor              = Color3.fromRGB(220, 235, 255),
+\tSnowSize               = { Min = 3, Max = 7 },
+\tGlassOpacity           = ${glass},
+\tSlideInEnabled         = ${slidein},
+\tBlurEnabled            = ${bluren},
+\tBlurSize               = ${blur},
+\tOverlayOpacity         = 0.65,
+\tCloseOnSuccess         = ${closeok},
+\tSuccessMessage         = "${q(success)}",
+\tKeyFile                = "${q(keyfile)}",
+\tDiscord                = "${q(discord)}",
+\tSocials = {
 ${socialsStr}
-  },
-  AppLinks = {
+\t},
+\tAppLinks = {
 ${applinksStr}
-  },
-  Instructions = {
+\t},
+\tInstructions = {
 ${instrStr}
-  },
-  Changelog = {
-    Show  = true,
-    Title = "What's New",
-    Versions = {
+\t},
+\tChangelog = {
+\t\tShow  = true,
+\t\tTitle = "What's New",
+\t\tVersions = {
 ${clStr}
-    },
-  },
+\t\t},
+\t},
 }
-
 local Config = {
-  Name=UI_Configs.Name, Version=UI_Configs.Version, Color=UI_Configs.Color,
-  GradientAnimated=UI_Configs.GradientAnimated,
-  GradientAnimationSpeed=UI_Configs.GradientAnimationSpeed,
-  BadgeText=UI_Configs.BadgeText, ShowOutline=UI_Configs.ShowOutline,
-  KeySystemLabel=UI_Configs.KeySystemLabel,
-  KeySystemPlaceholder=UI_Configs.KeySystemPlaceholder,
-  ShowMemberCount=UI_Configs.ShowMemberCount,
-  SnowEnabled=UI_Configs.SnowEnabled, SnowDensity=UI_Configs.SnowDensity,
-  SnowColor=UI_Configs.SnowColor, SnowSize=UI_Configs.SnowSize,
-  GlassOpacity=UI_Configs.GlassOpacity, SlideInEnabled=UI_Configs.SlideInEnabled,
-  BlurEnabled=UI_Configs.BlurEnabled, BlurSize=UI_Configs.BlurSize,
-  OverlayOpacity=UI_Configs.OverlayOpacity, CloseOnSuccess=UI_Configs.CloseOnSuccess,
-  SuccessMessage=UI_Configs.SuccessMessage, KeyFile=UI_Configs.KeyFile,
-  Discord=UI_Configs.Discord, Socials=UI_Configs.Socials,
-  AppLinks=UI_Configs.AppLinks, Instructions=UI_Configs.Instructions,
-  Changelog=UI_Configs.Changelog,
-  UseJunkie=Junkie_Configs.UseJunkie, Junkie_Webhook=Junkie_Configs.Junkie_Webhook,
-  Junkie={ Service=Junkie_Configs.Service, Identifier=Junkie_Configs.Identifier, Provider=Junkie_Configs.Provider },
-  Providers=Junkie_Configs.Providers, MaxKeyAttempts=Junkie_Configs.MaxKeyAttempts,
-  Premium=Junkie_Configs.Premium, GameSupport=Junkie_Configs.GameSupport,
+\tName                   = UI_Configs.Name,
+\tVersion                = UI_Configs.Version,
+\tColor                  = UI_Configs.Color,
+\tText_Color             = UI_Configs.Text_Color,
+\tGradientAnimated       = UI_Configs.GradientAnimated,
+\tGradientAnimationSpeed = UI_Configs.GradientAnimationSpeed,
+\tIcon                   = UI_Configs.Icon,
+\tBadgeText              = UI_Configs.BadgeText,
+\tCustomFont             = UI_Configs.CustomFont,
+\tShowOutline            = UI_Configs.ShowOutline,
+\tKeySystemLabel         = UI_Configs.KeySystemLabel,
+\tKeySystemPlaceholder   = UI_Configs.KeySystemPlaceholder,
+\tShowMemberCount        = UI_Configs.ShowMemberCount,
+\tSnowEnabled            = UI_Configs.SnowEnabled,
+\tSnowDensity            = UI_Configs.SnowDensity,
+\tSnowColor              = UI_Configs.SnowColor,
+\tSnowSize               = UI_Configs.SnowSize,
+\tGlassOpacity           = UI_Configs.GlassOpacity,
+\tSlideInEnabled         = UI_Configs.SlideInEnabled,
+\tBlurEnabled            = UI_Configs.BlurEnabled,
+\tBlurSize               = UI_Configs.BlurSize,
+\tOverlayOpacity         = UI_Configs.OverlayOpacity,
+\tCloseOnSuccess         = UI_Configs.CloseOnSuccess,
+\tSuccessMessage         = UI_Configs.SuccessMessage,
+\tKeyFile                = UI_Configs.KeyFile,
+\tDiscord                = UI_Configs.Discord,
+\tSocials                = UI_Configs.Socials,
+\tAppLinks               = UI_Configs.AppLinks,
+\tInstructions           = UI_Configs.Instructions,
+\tChangelog              = UI_Configs.Changelog,
+\tUseJunkie              = Junkie_Configs.UseJunkie,
+\tJunkie_Webhook         = Junkie_Configs.Junkie_Webhook,
+\tJunkie = {
+\t\tService    = Junkie_Configs.Service,
+\t\tIdentifier = Junkie_Configs.Identifier,
+\t\tProvider   = Junkie_Configs.Provider,
+\t},
+\tProviders      = Junkie_Configs.Providers,
+\tMaxKeyAttempts = Junkie_Configs.MaxKeyAttempts,
+\tPremium        = Junkie_Configs.Premium,
+\tGameSupport    = Junkie_Configs.GameSupport,
 }
-
-local Hub
-pcall(function()
-  local src = game:HttpGet("")
-  if #src < 100 then return end
-  Hub = loadstring(src)()
-end)
-if type(Hub) ~= "table" then return end
-
-local autoLogin = TryAutoLogin()
-if not autoLogin then
-  pcall(function()
-    local hub = Hub.new(Config)
-    hub:Init()
-  end)
+local Hub = loadstring(game:HttpGet("https://cdn.jnkie.com/havoc.lua"))()
+local function hasFileSystemSupport()
+\tlocal hw = pcall(function() return type(writefile) == "function" end)
+\tlocal hr = pcall(function() return type(readfile) == "function" end)
+\tlocal hi = pcall(function() return type(isfile) == "function" end)
+\treturn hw and hr and hi
 end
-
-while not getgenv().SCRIPT_KEY do
-  task.wait(0.1)
+local fileSystemSupported = hasFileSystemSupport()
+local KeyFile = UI_Configs.KeyFile or ""
+local function saveVerifiedKey(key)
+\tif not fileSystemSupported then return false end
+\treturn pcall(function()
+\t\twritefile(KeyFile, key)
+\tend)
 end
-
-return Hub`;
+local function loadVerifiedKey()
+\tif not fileSystemSupported then return nil end
+\tlocal ok, content = pcall(function()
+\t\treturn readfile(KeyFile)
+\tend)
+\tif not ok or not content or content == "" then return nil end
+\treturn content
+end
+local function TryAutoLogin()
+\tif not Junkie_Configs.UseJunkie then return false end
+\tlocal lib = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
+\tlib.service    = Junkie_Configs.Service
+\tlib.identifier = Junkie_Configs.Identifier
+\tlib.provider   = Junkie_Configs.Provider
+\tlocal savedKey   = loadVerifiedKey()
+\tlocal keyToCheck = savedKey or getgenv().SCRIPT_KEY
+\tif not keyToCheck or keyToCheck == "" then return false end
+\tlocal result = lib.check_key(keyToCheck)
+\tif result and result.valid then
+\t\tif result.message == "KEYLESS" then
+\t\t\tgetgenv().SCRIPT_KEY = "KEYLESS"
+\t\t\tgetgenv().LOAD       = true
+\t\telse
+\t\t\tif not savedKey then saveVerifiedKey(keyToCheck) end
+\t\t\tgetgenv().SCRIPT_KEY = keyToCheck
+\t\t\tgetgenv().LOAD       = true
+\t\tend
+\t\treturn true
+\tend
+\treturn false
+end
+local autoLoginResult = TryAutoLogin()
+if not autoLoginResult then
+\tpcall(function()
+\t\tlocal hub = Hub.new(Config)
+\t\thub:Init()
+\tend)
+end
+while not getgenv().LOAD do
+\ttask.wait(0.1)
+end`;
 
   const pre = document.getElementById('pre-gen');
   if (pre) pre.textContent = code;
