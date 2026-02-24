@@ -3,718 +3,478 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Havoc Preset — Tutorial</title>
+<title>Havoc Preset — Docs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Cal+Sans&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
 <style>
-
 :root {
-  --bg:       #08100a;
-  --surface:  #0d180f;
-  --surface2: #122016;
-  --border:   rgba(74,222,128,0.08);
-  --border2:  rgba(74,222,128,0.14);
+  --bg:       #07100a;
+  --surface:  #0c1810;
+  --surface2: #101e13;
+  --surface3: #162418;
+  --border:   rgba(74,222,128,0.07);
+  --border2:  rgba(74,222,128,0.13);
   --border3:  rgba(74,222,128,0.22);
-
-  --fg:       #e2f0e2;
-  --fg2:      #8aab8a;
-  --fg3:      #4d6b4d;
-
+  --fg:       #deeede;
+  --fg2:      #7fa07f;
+  --fg3:      #3d5e3d;
   --green:    #4ade80;
-  --green-dim:#22c55e;
-  --green-bg: rgba(74,222,128,0.07);
-  --green-bg2:rgba(74,222,128,0.12);
-
+  --green-d:  #22c55e;
+  --green-bg: rgba(74,222,128,0.06);
+  --green-bg2:rgba(74,222,128,0.11);
   --red:      #f87171;
   --blue:     #93c5fd;
   --amber:    #fcd34d;
   --purple:   #c4b5fd;
   --orange:   #fdba74;
-
   --radius:   10px;
   --radius-sm:6px;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Inter', sans-serif;
-  --display: 'Inter', sans-serif;
-  --sidebar-w: 256px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+  --sidebar-w: 252px;
+  --topbar-h: 52px;
+  --spring: cubic-bezier(0.16,1,0.3,1);
+  --ease:   cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.7;min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--green);text-decoration:none}
+a:hover{text-decoration:underline}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5}
 
-  --spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease:   cubic-bezier(0.4, 0, 0.2, 1);
-}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes gridMove{from{background-position:0 0}to{background-position:48px 48px}}
+@keyframes glow{0%,100%{opacity:0.5}50%{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pageSlide{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes loadingBar{0%{width:0%}20%{width:30%}50%{width:60%}80%{width:85%}100%{width:100%}}
+@keyframes bounceIn{0%{opacity:0;transform:scale(0.8) translateY(20px)}60%{transform:scale(1.05) translateY(-4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.7;
-  min-height: 100vh;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-a { color: var(--green); text-decoration: none; }
-a:hover { text-decoration: underline; }
+#home{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);transition:opacity 0.55s var(--ease),transform 0.55s var(--ease);overflow:hidden}
+#home.out{opacity:0;transform:scale(1.04);pointer-events:none}
+.h-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(74,222,128,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(74,222,128,0.035) 1px,transparent 1px);background-size:48px 48px;animation:gridMove 20s linear infinite}
+.h-glow{position:absolute;width:700px;height:700px;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(74,222,128,0.055) 0%,transparent 68%);animation:glow 6s ease-in-out infinite;border-radius:50%}
+.h-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.12;animation:float 9s ease-in-out infinite}
+.h-orb-1{width:320px;height:320px;background:var(--green-d);top:-90px;left:-70px;animation-delay:0s}
+.h-orb-2{width:220px;height:220px;background:#15803d;bottom:-50px;right:-50px;animation-delay:3.5s}
+.h-content{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0}
+.h-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;background:var(--green-bg);border:1px solid var(--border2);border-radius:999px;font-family:var(--mono);font-size:10.5px;letter-spacing:0.5px;color:var(--green);margin-bottom:28px;animation:fadeUp 0.8s 0.1s var(--spring) both}
+.h-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+.h-title{font-size:clamp(52px,9vw,96px);font-weight:800;letter-spacing:-3px;line-height:0.93;color:var(--fg);animation:fadeUp 0.8s 0.2s var(--spring) both}
+.h-accent{display:block;background:linear-gradient(135deg,var(--green) 0%,#86efac 45%,var(--green-d) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-3px}
+.h-sub{font-size:15px;color:var(--fg3);font-weight:400;margin-top:16px;letter-spacing:0.2px;animation:fadeUp 0.8s 0.3s var(--spring) both}
+.h-btns{display:flex;align-items:center;gap:10px;margin-top:32px;animation:fadeUp 0.8s 0.4s var(--spring) both;flex-wrap:wrap;justify-content:center}
+.h-btn-p{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;background:var(--green);color:#061209;font-weight:700;font-size:14px;border-radius:var(--radius);border:none;cursor:pointer;transition:all 0.2s var(--ease);position:relative;overflow:hidden;font-family:var(--sans)}
+.h-btn-p:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(74,222,128,0.32)}
+.h-btn-p svg{width:15px;height:15px;flex-shrink:0}
+.h-btn-s{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--surface);color:var(--fg2);font-weight:500;font-size:14px;border-radius:var(--radius);border:1px solid var(--border2);cursor:pointer;text-decoration:none;transition:all 0.2s var(--ease);font-family:var(--sans)}
+.h-btn-s:hover{background:var(--surface2);color:var(--fg);border-color:var(--border3);text-decoration:none;transform:translateY(-2px)}
+.h-btn-s svg{width:14px;height:14px;flex-shrink:0}
+.h-links{display:flex;align-items:center;gap:6px;margin-top:18px;animation:fadeUp 0.8s 0.5s var(--spring) both}
+.h-link{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;color:var(--fg3);font-size:12px;border-radius:var(--radius-sm);text-decoration:none;transition:color 0.15s,background 0.15s}
+.h-link:hover{color:var(--green);background:var(--green-bg);text-decoration:none}
+.h-link svg{width:12px;height:12px}
+.h-sep{width:1px;height:14px;background:var(--border2)}
 
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9998; opacity: 0.4;
-}
+#app{display:none;height:100vh;width:100vw;overflow:hidden;flex-direction:column}
+#app.visible{display:flex;animation:fadeIn 0.35s ease both}
+#topbar{height:var(--topbar-h);flex-shrink:0;background:rgba(7,16,10,0.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;position:relative;z-index:200}
+.tb-logo{display:flex;align-items:center;gap:10px;padding:0 18px;text-decoration:none;border-right:1px solid var(--border);height:100%;flex-shrink:0;transition:opacity 0.15s}
+.tb-logo:hover{opacity:0.8;text-decoration:none}
+.tb-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--green-d),var(--green));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 14px rgba(74,222,128,0.2)}
+.tb-mark svg{width:14px;height:14px;color:#061209}
+.tb-name{font-size:14px;font-weight:700;color:var(--fg);letter-spacing:-0.2px}
+.tb-ver{font-family:var(--mono);font-size:9.5px;color:var(--green);opacity:0.65;letter-spacing:0.5px}
+#sb-toggle{display:flex;align-items:center;gap:7px;padding:0 14px;background:transparent;border:none;border-right:1px solid var(--border);height:100%;color:var(--fg3);font-size:13px;font-weight:500;cursor:pointer;transition:color 0.15s,background 0.15s;flex-shrink:0;font-family:var(--sans)}
+#sb-toggle svg{width:15px;height:15px}
+#sb-toggle:hover{color:var(--fg);background:var(--green-bg)}
+.tb-mid{flex:1;display:flex;align-items:center;padding:0 14px;gap:12px}
+.tb-search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;width:200px;transition:border-color 0.2s,box-shadow 0.2s,width 0.3s var(--spring)}
+.tb-search:focus-within{border-color:var(--border3);box-shadow:0 0 0 3px rgba(74,222,128,0.05);width:260px}
+.tb-search svg{width:13px;height:13px;color:var(--fg3);flex-shrink:0}
+.tb-search input{background:transparent;border:none;outline:none;font-family:var(--sans);font-size:13px;color:var(--fg);width:100%}
+.tb-search input::placeholder{color:var(--fg3)}
+.tb-bc{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg3)}
+.tb-bc svg{width:12px;height:12px}
+.tb-bc-curr{color:var(--fg2);font-weight:500}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;height:100%;border-left:1px solid var(--border)}
+.tb-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.11);border-radius:999px;font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.3px}
+.tb-pill-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2.5s ease-in-out infinite}
+#body{flex:1;display:flex;overflow:hidden}
 
-@keyframes fadeUp   { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
-@keyframes fadeIn   { from { opacity:0 } to { opacity:1 } }
-@keyframes scalePop { from { opacity:0; transform:scale(0.96) } to { opacity:1; transform:scale(1) } }
-@keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@keyframes gridMove { from{background-position:0 0} to{background-position:60px 60px} }
-@keyframes shimmer  { from{transform:translateX(-100%)} to{transform:translateX(200%)} }
-@keyframes glow     { 0%,100%{opacity:0.6} 50%{opacity:1} }
-@keyframes orbit    {
-  from { transform: rotate(0deg) translateX(180px) rotate(0deg); }
-  to   { transform: rotate(360deg) translateX(180px) rotate(-360deg); }
-}
-@keyframes float {
-  0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
-}
-@keyframes pageSlide {
-  from { opacity:0; transform:translateX(18px); }
-  to   { opacity:1; transform:translateX(0); }
-}
+#sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.3s var(--spring),opacity 0.25s ease,transform 0.3s var(--spring)}
+#sidebar.hidden{width:0;opacity:0;pointer-events:none;transform:translateX(-8px)}
+.sb-inner{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px}
+.sb-inner::-webkit-scrollbar{width:3px}
+.sb-inner::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.nav-sec{margin-bottom:4px}
+.nav-sec-label{font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--fg3);padding:8px 10px 4px;display:flex;align-items:center;gap:8px}
+.nav-sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:7px 10px;background:transparent;border:none;border-radius:var(--radius-sm);color:var(--fg3);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;text-align:left;transition:color 0.15s,background 0.15s;white-space:nowrap;overflow:hidden}
+.nav-btn svg{width:14px;height:14px;flex-shrink:0;opacity:0.65;transition:opacity 0.15s}
+.nav-btn:hover{color:var(--fg);background:rgba(255,255,255,0.04)}
+.nav-btn:hover svg{opacity:1}
+.nav-btn.active{color:var(--green);background:var(--green-bg);font-weight:500}
+.nav-btn.active svg{color:var(--green);opacity:1}
+.nav-btn.sub{padding-left:30px;font-size:12.5px}
+.nav-btn.sub svg{width:12px;height:12px}
+.nav-btn.search-hidden{display:none}
+.sb-footer{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sb-footer-text{font-size:11px;color:var(--fg3)}
+.sb-footer-text span{color:var(--green)}
 
-#home {
-  position: fixed; inset: 0; z-index: 500;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: var(--bg);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  overflow: hidden;
-}
-#home.out { opacity: 0; transform: scale(1.03); pointer-events: none; }
+#pages{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.page{display:none;flex-direction:column;height:100%;overflow:hidden}
+.page.active{display:flex;animation:pageSlide 0.28s var(--spring) both}
+.page-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:32px 40px 48px}
+.page-scroll::-webkit-scrollbar{width:4px}
+.page-scroll::-webkit-scrollbar-track{background:transparent}
+.page-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.page-hero{padding:0;border-bottom:1px solid var(--border);position:relative;overflow:hidden;flex-shrink:0}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 0% 50%,rgba(74,222,128,0.035) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 100% 0%,rgba(74,222,128,0.025) 0%,transparent 50%)}
+.hero-inner{position:relative;z-index:1;padding:40px 40px 32px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;background:var(--green-bg);border:1px solid var(--border2);font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.5px;margin-bottom:18px;animation:fadeUp 0.45s 0.05s var(--spring) both}
+.hero-eyebrow svg{width:11px;height:11px}
+.hero-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.05;color:var(--fg);margin-bottom:12px;animation:fadeUp 0.45s 0.1s var(--spring) both}
+.hero-title em{color:var(--green);font-style:normal}
+.hero-desc{font-size:14px;color:var(--fg2);max-width:500px;line-height:1.75;margin-bottom:22px;animation:fadeUp 0.45s 0.15s var(--spring) both}
+.hero-badges{display:flex;gap:7px;flex-wrap:wrap;animation:fadeUp 0.45s 0.2s var(--spring) both}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-family:var(--mono);letter-spacing:0.3px;border:1px solid var(--border2);background:var(--surface)}
+.badge svg{width:11px;height:11px}
+.badge-green{color:var(--green);border-color:rgba(74,222,128,0.18);background:var(--green-bg)}
+.badge-blue{color:var(--blue);border-color:rgba(147,197,253,0.18);background:rgba(147,197,253,0.04)}
+.badge-dim{color:var(--fg2);border-color:var(--border2);background:var(--surface2)}
+.page-header{padding:32px 40px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.page-eyebrow{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--green);opacity:0.65;margin-bottom:7px;display:flex;align-items:center;gap:6px;animation:fadeUp 0.38s var(--spring) both}
+.page-eyebrow svg{width:10px;height:10px}
+.page-title{font-size:clamp(22px,3.5vw,36px);font-weight:800;letter-spacing:-0.8px;line-height:1.1;color:var(--fg);animation:fadeUp 0.38s 0.04s var(--spring) both}
+.page-desc{font-size:13.5px;color:var(--fg2);max-width:560px;margin-top:7px;line-height:1.7;animation:fadeUp 0.38s 0.08s var(--spring) both}
+.doc-content{padding-top:24px}
+h3{font-size:15px;font-weight:700;letter-spacing:-0.2px;color:var(--fg);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+h3 svg{width:14px;height:14px;color:var(--green);flex-shrink:0}
+h3::after{content:'';flex:1;height:1px;background:var(--border);max-width:100px}
+p{font-size:13.5px;color:var(--fg2);margin-bottom:10px;line-height:1.75}
+code{font-family:var(--mono);font-size:11.5px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 5px;color:var(--orange)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;transition:border-color 0.2s}
+.card:hover{border-color:var(--border2)}
+.prop-table{width:100%;border-collapse:collapse;margin:10px 0 20px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.prop-table thead tr{background:var(--surface2)}
+.prop-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.3px;color:var(--fg3);font-weight:700;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.prop-table tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+.prop-table tbody tr:last-child{border-bottom:none}
+.prop-table tbody tr:hover{background:rgba(74,222,128,0.018)}
+.prop-table td{padding:9px 14px;vertical-align:top;line-height:1.5}
+.pname{font-family:var(--mono);font-size:11.5px;color:var(--green);font-weight:500;white-space:nowrap}
+.ptype{font-family:var(--mono);font-size:10.5px;color:var(--purple);white-space:nowrap;padding:0 8px}
+.ptype-pill{display:inline-block;padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;border:1px solid}
+.ptype-bool{color:#f97583;border-color:rgba(249,117,131,0.25);background:rgba(249,117,131,0.08)}
+.ptype-str{color:#9ecfb8;border-color:rgba(158,207,184,0.25);background:rgba(158,207,184,0.07)}
+.ptype-num{color:#79c0ff;border-color:rgba(121,192,255,0.25);background:rgba(121,192,255,0.07)}
+.ptype-color{color:var(--purple);border-color:rgba(196,181,253,0.25);background:rgba(196,181,253,0.07)}
+.ptype-arr{color:var(--amber);border-color:rgba(252,211,77,0.25);background:rgba(252,211,77,0.07)}
+.pdesc{color:var(--fg2);font-size:13px}
 
-.h-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: gridMove 24s linear infinite;
-}
+.codeblock{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:12px 0;position:relative}
+.cb-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--surface2);gap:8px}
+.cb-left{display:flex;align-items:center;gap:10px}
+.cb-dots{display:flex;gap:5px}
+.cb-dot-r{width:9px;height:9px;border-radius:50%;background:#f87171;opacity:0.7}
+.cb-dot-y{width:9px;height:9px;border-radius:50%;background:var(--amber);opacity:0.7}
+.cb-dot-g{width:9px;height:9px;border-radius:50%;background:var(--green);opacity:0.7}
+.cb-lang{font-family:var(--mono);font-size:10px;color:var(--fg3);letter-spacing:0.5px}
+.cb-actions{display:flex;align-items:center;gap:6px}
+.cb-btn{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:3px 9px;font-family:var(--mono);font-size:9.5px;color:var(--fg3);cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;white-space:nowrap}
+.cb-btn svg{width:10px;height:10px}
+.cb-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.cb-wrap{position:relative;overflow:hidden}
+.cb-lines{display:flex;overflow-x:auto}
+.cb-lines::-webkit-scrollbar{height:3px}
+.cb-lines::-webkit-scrollbar-thumb{background:var(--border2)}
+.line-nums{padding:14px 0;background:var(--surface2);border-right:1px solid var(--border);flex-shrink:0;user-select:none}
+.line-nums span{display:block;padding:0 12px;font-family:var(--mono);font-size:11.5px;color:var(--fg3);line-height:1.7;opacity:0.5;text-align:right}
+pre.cb-pre{padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.7;color:#94b894;flex:1;min-width:0;overflow:visible;white-space:pre}
+.cb-cursor{display:inline-block;width:2px;height:1em;background:var(--green);vertical-align:text-bottom;animation:blink 1s step-end infinite;margin-left:1px}
+.kw{color:#f97583}.str{color:#9ecfb8}.num{color:#79c0ff}.fn{color:#b8d4a0}.cm{color:#3d5e3d;font-style:italic}.key{color:#dda678}.bool{color:#f97583}
 
-.h-glow {
-  position: absolute;
-  width: 600px; height: 600px;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(74,222,128,0.06) 0%, transparent 70%);
-  animation: glow 5s ease-in-out infinite;
-  border-radius: 50%;
-}
+.callout{display:flex;gap:12px;padding:11px 15px;border-left:2px solid;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:12px 0;font-size:13px;line-height:1.65;background:var(--surface)}
+.callout-icon{flex-shrink:0;margin-top:1px}
+.callout-icon svg{width:14px;height:14px}
+.callout strong{font-weight:600}
+.callout.tip{border-color:var(--green);color:#a8d8a8}
+.callout.tip .callout-icon svg{color:var(--green)}
+.callout.warn{border-color:var(--amber);color:#d4b87a}
+.callout.warn .callout-icon svg{color:var(--amber)}
+.callout.info{border-color:var(--blue);color:#93b8d4}
+.callout.info .callout-icon svg{color:var(--blue)}
 
-.h-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.15;
-  animation: float 8s ease-in-out infinite;
-}
-.h-orb-1 { width:300px; height:300px; background:var(--green-dim); top:-80px; left:-60px; animation-delay:0s; }
-.h-orb-2 { width:200px; height:200px; background:#16a34a; bottom:-40px; right:-40px; animation-delay:3s; }
+.steps{display:flex;flex-direction:column;gap:2px;margin:14px 0 22px}
+.step{display:flex;gap:14px;padding:13px 14px;border-radius:var(--radius-sm);transition:background 0.15s}
+.step:hover{background:rgba(74,222,128,0.018)}
+.step-num{width:28px;height:28px;flex-shrink:0;background:var(--green-bg);border:1px solid var(--border2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green);margin-top:1px}
+.step-title{font-size:14px;font-weight:600;color:var(--fg);margin-bottom:3px}
+.step-desc{font-size:13px;color:var(--fg2);line-height:1.65}
 
-.h-content {
-  position: relative; z-index: 1;
-  text-align: center;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0;
-}
+.tags-table{width:100%;border-collapse:collapse;margin:10px 0}
+.tags-table tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+.tags-table tr:hover{background:rgba(74,222,128,0.018)}
+.tags-table td{padding:9px 14px;font-size:13px}
+.tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.8px;padding:2px 8px;border-radius:4px;text-transform:uppercase;border:1px solid}
+.tag-new{color:var(--green);border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.1)}
+.tag-fix{color:var(--red);border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.1)}
+.tag-imp{color:var(--blue);border-color:rgba(147,197,253,0.3);background:rgba(147,197,253,0.1)}
+.tag-rem{color:var(--orange);border-color:rgba(253,186,116,0.3);background:rgba(253,186,116,0.1)}
+.tag-sec{color:var(--amber);border-color:rgba(252,211,77,0.3);background:rgba(252,211,77,0.1)}
 
-.h-tag {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 5px 14px;
-  background: var(--green-bg);
-  border: 1px solid var(--border2);
-  border-radius: 999px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px;
-  color: var(--green);
-  margin-bottom: 28px;
-  animation: fadeUp 0.8s 0.1s var(--spring) both;
-}
-.h-tag-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+.divider{height:1px;background:var(--border);margin:24px 0}
 
-.h-title {
-  font-size: clamp(52px, 9vw, 100px);
-  font-weight: 700;
-  letter-spacing: -3px;
-  line-height: 0.95;
-  color: var(--fg);
-  animation: fadeUp 0.8s 0.2s var(--spring) both;
-}
-.h-title-accent {
-  display: block;
-  background: linear-gradient(135deg, var(--green) 0%, #86efac 50%, var(--green-dim) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  letter-spacing: -3px;
-}
+.img-showcase{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color 0.25s,box-shadow 0.25s;perspective:800px}
+.img-showcase:hover{border-color:var(--border3);box-shadow:0 8px 40px rgba(74,222,128,0.07)}
+.img-showcase img{width:100%;display:block;transition:transform 0.08s ease;border-radius:calc(var(--radius) - 1px)}
+.img-hint{position:absolute;bottom:10px;right:10px;background:rgba(7,16,10,0.88);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--green);padding:4px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.5px;opacity:0;transition:opacity 0.2s;pointer-events:none;display:flex;align-items:center;gap:5px}
+.img-hint svg{width:10px;height:10px}
+.img-showcase:hover .img-hint{opacity:1}
 
-.h-sub {
-  font-size: 15px; color: var(--fg3);
-  font-weight: 400; margin-top: 18px;
-  letter-spacing: 0.3px;
-  animation: fadeUp 0.8s 0.3s var(--spring) both;
-}
+#lightbox{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.93);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity 0.3s ease}
+#lightbox.open{opacity:1;pointer-events:all}
+#lightbox img{max-width:88vw;max-height:86vh;border-radius:var(--radius);border:1px solid var(--border2);box-shadow:0 32px 80px rgba(0,0,0,0.6);cursor:default;transition:transform 0.08s ease}
+#lb-close{position:absolute;top:20px;right:20px;width:36px;height:36px;background:var(--surface);border:1px solid var(--border2);border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg2);transition:all 0.15s}
+#lb-close svg{width:15px;height:15px}
+#lb-close:hover{background:var(--surface2);border-color:var(--border3);color:var(--fg)}
 
-.h-links {
-  display: flex; align-items: center; gap: 10px;
-  margin-top: 36px;
-  animation: fadeUp 0.8s 0.4s var(--spring) both;
-  flex-wrap: wrap; justify-content: center;
-}
+#page-nav{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:9px 40px;border-top:1px solid var(--border);background:rgba(7,16,10,0.65);backdrop-filter:blur(8px);gap:12px}
+.pnav-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--fg2);cursor:pointer;transition:all 0.15s;font-family:var(--sans)}
+.pnav-btn svg{width:13px;height:13px}
+.pnav-btn:hover:not(:disabled){color:var(--green);border-color:var(--border3);background:var(--green-bg);transform:translateY(-1px)}
+.pnav-btn:disabled{opacity:0.3;cursor:not-allowed}
+.pnav-center{display:flex;flex-direction:column;align-items:center;gap:5px}
+.pnav-dots{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:200px}
+.pnav-dot{width:5px;height:5px;background:var(--border2);border-radius:50%;cursor:pointer;transition:all 0.2s var(--spring)}
+.pnav-dot:hover:not(.active){background:var(--fg3);transform:scale(1.2)}
+.pnav-dot.active{background:var(--green);transform:scale(1.4);box-shadow:0 0 6px rgba(74,222,128,0.5)}
+.pnav-label{font-size:11px;color:var(--fg3);font-family:var(--mono);letter-spacing:0.3px}
+#sb-overlay{display:none;position:fixed;inset:0;top:var(--topbar-h);background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:140}
+#sb-overlay.visible{display:block}
 
-.h-btn-primary {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 11px 26px;
-  background: var(--green);
-  color: #071209;
-  font-weight: 600; font-size: 14px;
-  border-radius: var(--radius);
-  border: none; cursor: pointer;
-  transition: all 0.2s var(--ease);
-  position: relative; overflow: hidden;
-}
-.h-btn-primary::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-  transition: opacity 0.2s;
-}
-.h-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,222,128,0.3); }
-.h-btn-primary:active { transform: translateY(0); }
-.h-btn-primary svg { width: 15px; height: 15px; flex-shrink: 0; }
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:9px 16px;font-size:13px;color:var(--fg);display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:transform 0.3s var(--spring),opacity 0.3s ease;opacity:0;pointer-events:none;z-index:1000;white-space:nowrap}
+#toast svg{width:14px;height:14px;color:var(--green);flex-shrink:0}
 
-.h-btn-secondary {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 11px 22px;
-  background: var(--surface);
-  color: var(--fg2);
-  font-weight: 500; font-size: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border2);
-  cursor: pointer; text-decoration: none;
-  transition: all 0.2s var(--ease);
-}
-.h-btn-secondary:hover {
-  background: var(--surface2); color: var(--fg);
-  border-color: var(--border3); text-decoration: none;
-  transform: translateY(-2px);
-}
-.h-btn-secondary svg { width: 14px; height: 14px; flex-shrink: 0; }
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.gen-field{display:flex;flex-direction:column;gap:6px}
+.gen-field.full{grid-column:1/-1}
+.gen-label{font-size:12px;font-weight:600;color:var(--fg2);letter-spacing:0.3px;display:flex;align-items:center;gap:6px}
+.gen-label svg{width:12px;height:12px;color:var(--green)}
+.gen-input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--fg);outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%}
+.gen-input:focus{border-color:var(--border3);box-shadow:0 0 0 3px rgba(74,222,128,0.06)}
+.gen-input::placeholder{color:var(--fg3)}
+.gen-select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--fg);outline:none;transition:border-color 0.2s;width:100%;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234d6b4d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.gen-select:focus{border-color:var(--border3)}
+.gen-select option{background:#0c1810}
 
-.h-socials {
-  display: flex; align-items: center; gap: 6px;
-  margin-top: 20px;
-  animation: fadeUp 0.8s 0.5s var(--spring) both;
-}
-.h-social-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 12px;
-  color: var(--fg3); font-size: 12px;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  transition: color 0.15s, background 0.15s;
-}
-.h-social-link svg { width: 13px; height: 13px; }
-.h-social-link:hover { color: var(--green); background: var(--green-bg); text-decoration: none; }
-.h-divider { width: 1px; height: 14px; background: var(--border2); }
+.color-section{display:flex;flex-direction:column;gap:10px}
+.color-presets{display:flex;gap:7px;flex-wrap:wrap}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;flex-shrink:0}
+.color-swatch:hover{transform:scale(1.15);border-color:rgba(255,255,255,0.3)}
+.color-swatch.selected{border-color:white;transform:scale(1.1)}
+.color-rgb-row{display:flex;align-items:center;gap:8px}
+.color-rgb-label{font-size:11px;color:var(--fg3);font-family:var(--mono);white-space:nowrap}
+.color-rgb-inputs{display:flex;gap:6px;flex:1}
+.color-rgb-input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 8px;font-family:var(--mono);font-size:12px;color:var(--fg);outline:none;width:100%;text-align:center;transition:border-color 0.2s}
+.color-rgb-input:focus{border-color:var(--border3)}
+.color-preview{width:36px;height:36px;border-radius:8px;border:1px solid var(--border2);flex-shrink:0;transition:background 0.2s}
 
-#app { display: none; height: 100vh; width: 100vw; overflow: hidden; flex-direction: column; }
-#app.visible { display: flex; animation: fadeIn 0.4s ease both; }
+.toggle-row{display:flex;align-items:center;gap:10px}
+.toggle{position:relative;width:38px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border2);border-radius:999px;cursor:pointer;transition:all 0.25s}
+.toggle-slider::before{content:'';position:absolute;height:14px;width:14px;left:2px;bottom:2px;background:var(--fg3);border-radius:50%;transition:all 0.25s}
+.toggle input:checked + .toggle-slider{background:var(--green-bg);border-color:rgba(74,222,128,0.4)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px);background:var(--green)}
+.toggle-label{font-size:13px;color:var(--fg2)}
 
-#bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--green-dim), var(--green));
-  transform-origin: left; transform: scaleX(0);
-  z-index: 300; opacity: 0.8;
-  box-shadow: 0 0 12px rgba(74,222,128,0.4);
-  transition: transform 0.1s linear;
-}
+.gen-section-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--fg3);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.gen-section-title svg{width:12px;height:12px;color:var(--green)}
+.gen-submit{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;background:var(--green);color:#061209;font-weight:700;font-size:15px;border-radius:var(--radius);border:none;cursor:pointer;transition:all 0.2s var(--ease);font-family:var(--sans);margin-top:6px}
+.gen-submit:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(74,222,128,0.3)}
+.gen-submit svg{width:17px;height:17px}
 
-#topbar {
-  height: 54px; flex-shrink: 0;
-  background: rgba(8,16,10,0.9);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  position: relative; z-index: 200;
-}
+#gen-loading{position:absolute;inset:0;background:var(--surface);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;border-radius:var(--radius);animation:fadeIn 0.3s ease}
+#gen-loading.visible{display:flex}
+.gen-loading-icon{width:56px;height:56px;background:var(--green-bg);border:1px solid var(--border2);border-radius:14px;display:flex;align-items:center;justify-content:center;animation:bounceIn 0.5s var(--spring) both}
+.gen-loading-icon svg{width:28px;height:28px;color:var(--green)}
+.gen-loading-title{font-size:18px;font-weight:700;color:var(--fg);letter-spacing:-0.3px}
+.gen-loading-msg{font-size:13px;color:var(--fg2);text-align:center;max-width:280px;line-height:1.65}
+.gen-loading-bar-wrap{width:240px;height:3px;background:var(--surface3);border-radius:999px;overflow:hidden}
+.gen-loading-bar{height:100%;background:linear-gradient(90deg,var(--green-d),var(--green));border-radius:999px;animation:loadingBar var(--load-dur,4s) ease-in-out forwards;width:0}
+.gen-loading-steps{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.gen-loading-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--fg3);font-family:var(--mono);opacity:0;transition:opacity 0.4s,color 0.4s}
+.gen-loading-step.visible{opacity:1}
+.gen-loading-step.done{color:var(--green)}
+.gen-loading-step svg{width:12px;height:12px}
 
-.tb-logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 20px; text-decoration: none;
-  border-right: 1px solid var(--border);
-  height: 100%; flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.tb-logo:hover { opacity: 0.8; text-decoration: none; }
-.tb-logo-mark {
-  width: 28px; height: 28px;
-  background: linear-gradient(135deg, var(--green-dim), var(--green));
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(74,222,128,0.2);
-}
-.tb-logo-mark svg { width: 14px; height: 14px; color: #071209; }
-.tb-name { font-size: 14px; font-weight: 600; color: var(--fg); letter-spacing: -0.2px; }
-.tb-domain { font-family: var(--mono); font-size: 10px; color: var(--green); opacity: 0.7; letter-spacing: 0.5px; }
+#gen-result{display:none;flex-direction:column;gap:12px;margin-top:4px;animation:bounceIn 0.5s var(--spring) both}
+#gen-result.visible{display:flex}
+.gen-result-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--green-bg);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius)}
+.gen-result-header svg{width:18px;height:18px;color:var(--green);flex-shrink:0}
+.gen-result-title{font-size:14px;font-weight:700;color:var(--green)}
+.gen-result-sub{font-size:12px;color:var(--fg2)}
+.gen-reset{display:flex;align-items:center;gap:7px;padding:9px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--fg2);cursor:pointer;transition:all 0.15s;margin-top:4px;align-self:flex-start}
+.gen-reset:hover{border-color:var(--border3);color:var(--fg)}
+.gen-reset svg{width:13px;height:13px}
+.gen-wrapper{position:relative}
 
-#sb-toggle {
-  display: flex; align-items: center; gap: 7px;
-  padding: 0 16px; background: transparent;
-  border: none; border-right: 1px solid var(--border);
-  height: 100%; color: var(--fg3);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: color 0.15s, background 0.15s;
-  flex-shrink: 0;
-}
-#sb-toggle svg { width: 15px; height: 15px; }
-#sb-toggle:hover { color: var(--fg); background: var(--green-bg); }
+.game-selected-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--green-bg);border:1px solid rgba(74,222,128,0.2);border-radius:999px;font-size:11px;color:var(--green);font-family:var(--mono);margin-top:5px}
+.game-selected-badge svg{width:10px;height:10px}
 
-.tb-mid { flex: 1; display: flex; align-items: center; padding: 0 16px; gap: 14px; }
+.editor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;transition:border-color 0.15s}
+.editor-row:hover{border-color:var(--border2)}
+.editor-row-icon{width:28px;height:28px;border-radius:6px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.editor-row-icon svg{width:14px;height:14px;color:var(--green)}
+.editor-row-name{font-size:13px;font-weight:500;color:var(--fg);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.editor-link-input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--mono);font-size:11px;color:var(--fg2);outline:none;width:160px;transition:border-color 0.2s;flex-shrink:0}
+.editor-link-input:focus{border-color:var(--border3)}
+.drag-handle{color:var(--fg3);cursor:grab;flex-shrink:0;display:flex;align-items:center;padding:0 2px}
+.drag-handle:active{cursor:grabbing}
+.drag-handle svg{width:14px;height:14px}
+.editor-row.dragging{opacity:0.5;border-color:var(--green)}
+.editor-row.drag-over{border-color:var(--green);background:var(--green-bg)}
 
-.tb-search {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  width: 220px;
-  transition: border-color 0.2s, box-shadow 0.2s, width 0.3s var(--spring);
-}
-.tb-search:focus-within {
-  border-color: var(--border3);
-  box-shadow: 0 0 0 3px rgba(74,222,128,0.06);
-  width: 280px;
-}
-.tb-search svg { width: 13px; height: 13px; color: var(--fg3); flex-shrink: 0; }
-.tb-search input {
-  background: transparent; border: none; outline: none;
-  font-family: var(--sans); font-size: 13px; color: var(--fg); width: 100%;
-}
-.tb-search input::placeholder { color: var(--fg3); }
+.instr-row{display:flex;gap:8px;align-items:flex-start;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;position:relative}
+.instr-row-num{width:22px;height:22px;flex-shrink:0;background:var(--green-bg);border:1px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green);margin-top:2px}
+.instr-fields{flex:1;display:flex;flex-direction:column;gap:5px}
+.instr-title-input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg);outline:none;width:100%;transition:border-color 0.2s}
+.instr-body-input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-family:var(--sans);font-size:12px;color:var(--fg2);outline:none;width:100%;resize:none;height:52px;transition:border-color 0.2s}
+.instr-title-input:focus,.instr-body-input:focus{border-color:var(--border3)}
+.instr-del-btn{background:transparent;border:none;color:var(--fg3);cursor:pointer;padding:4px;border-radius:4px;transition:color 0.15s;flex-shrink:0;display:flex;align-items:center}
+.instr-del-btn:hover{color:var(--red)}
+.instr-del-btn svg{width:13px;height:13px}
+.add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;border:1px dashed var(--border2);border-radius:var(--radius-sm);color:var(--fg3);font-size:12px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);width:100%;justify-content:center;margin-top:4px}
+.add-row-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.add-row-btn svg{width:12px;height:12px}
 
-.tb-breadcrumb {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--fg3);
-}
-.tb-breadcrumb svg { width: 12px; height: 12px; }
-.tb-breadcrumb-curr { color: var(--fg2); font-weight: 500; }
+.cl-version-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden}
+.cl-version-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface3);border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.cl-version-header:hover{background:var(--surface2)}
+.cl-version-tag-select{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:3px 7px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--fg);outline:none;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px}
+.cl-version-fields{display:flex;gap:6px;flex:1}
+.cl-version-input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--mono);font-size:11.5px;color:var(--fg);outline:none;transition:border-color 0.2s}
+.cl-version-input:focus{border-color:var(--border3)}
+.cl-notes-wrap{padding:8px 12px;display:flex;flex-direction:column;gap:5px}
+.cl-note-row{display:flex;gap:6px;align-items:center}
+.cl-note-row::before{content:'•';color:var(--green);font-size:14px;flex-shrink:0;line-height:1}
+.cl-note-input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--sans);font-size:12px;color:var(--fg2);outline:none;transition:border-color 0.2s}
+.cl-note-input:focus{border-color:var(--border3)}
+.cl-note-del{background:transparent;border:none;color:var(--fg3);cursor:pointer;padding:3px;border-radius:3px;display:flex;align-items:center;transition:color 0.15s;flex-shrink:0}
+.cl-note-del:hover{color:var(--red)}
+.cl-note-del svg{width:11px;height:11px}
+.cl-del-btn{background:transparent;border:none;color:var(--fg3);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;transition:color 0.15s;flex-shrink:0}
+.cl-del-btn:hover{color:var(--red)}
+.cl-del-btn svg{width:13px;height:13px}
 
-.tb-right {
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 16px; height: 100%;
-  border-left: 1px solid var(--border);
-}
-.tb-status-pill {
-  display: flex; align-items: center; gap: 6px;
-  padding: 4px 10px;
-  background: rgba(74,222,128,0.07);
-  border: 1px solid rgba(74,222,128,0.12);
-  border-radius: 999px;
-  font-family: var(--mono); font-size: 10px; color: var(--green);
-  letter-spacing: 0.3px;
-}
-.tb-status-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 2.5s ease-in-out infinite; }
+.dl-btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:var(--mono);font-size:12px;color:var(--fg2);cursor:pointer;transition:all 0.15s}
+.dl-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.dl-btn svg{width:13px;height:13px}
 
-#body { flex: 1; display: flex; overflow: hidden; }
+.provider-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;transition:border-color 0.15s}
+.provider-row:hover{border-color:var(--border2)}
+.provider-row.drag-over{border-color:var(--green);background:var(--green-bg)}
+.provider-row.dragging{opacity:0.4}
 
-#sidebar {
-  width: var(--sidebar-w); flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  transition: width 0.32s var(--spring), opacity 0.25s ease, transform 0.32s var(--spring);
-}
-#sidebar.hidden { width: 0; opacity: 0; pointer-events: none; transform: translateX(-10px); }
+.applink-locked{font-family:var(--mono);font-size:10px;color:var(--fg3);opacity:0.6;padding:4px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
 
-.sb-inner { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 8px; }
-.sb-inner::-webkit-scrollbar { width: 3px; }
-.sb-inner::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-.nav-section { margin-bottom: 6px; }
-.nav-section-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--fg3);
-  padding: 8px 10px 4px;
-  display: flex; align-items: center; gap: 8px;
-}
-.nav-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
-
-.nav-btn {
-  display: flex; align-items: center; gap: 9px;
-  width: 100%; padding: 7px 10px;
-  background: transparent; border: none; border-radius: var(--radius-sm);
-  color: var(--fg3); font-size: 13px; font-weight: 400; font-family: var(--sans);
-  cursor: pointer; text-align: left;
-  transition: color 0.15s, background 0.15s;
-  white-space: nowrap; overflow: hidden;
-}
-.nav-btn svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; transition: opacity 0.15s; }
-.nav-btn:hover { color: var(--fg); background: rgba(255,255,255,0.04); }
-.nav-btn:hover svg { opacity: 1; }
-.nav-btn.active {
-  color: var(--green); background: var(--green-bg);
-  font-weight: 500;
-}
-.nav-btn.active svg { color: var(--green); opacity: 1; }
-.nav-btn.sub { padding-left: 32px; font-size: 12.5px; }
-.nav-btn.sub svg { width: 12px; height: 12px; }
-.nav-btn.search-hidden { display: none; }
-
-.sb-footer {
-  padding: 12px 16px; border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.sb-footer-text { font-size: 11px; color: var(--fg3); }
-.sb-footer-text span { color: var(--green); }
-
-#pages { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-
-.page { display: none; flex-direction: column; height: 100%; overflow: hidden; }
-.page.active { display: flex; animation: pageSlide 0.3s var(--spring) both; }
-
-.page-scroll {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 36px 44px 48px;
-}
-.page-scroll::-webkit-scrollbar { width: 4px; }
-.page-scroll::-webkit-scrollbar-track { background: transparent; }
-.page-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-.page-hero {
-  padding: 0;
-  border-bottom: 1px solid var(--border);
-  position: relative; overflow: hidden; flex-shrink: 0;
-}
-.hero-bg {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 50% 80% at 0% 50%, rgba(74,222,128,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 100% 0%, rgba(74,222,128,0.03) 0%, transparent 50%);
-}
-.hero-inner {
-  position: relative; z-index: 1;
-  padding: 44px 44px 36px;
-}
-
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 4px 12px; border-radius: 999px;
-  background: var(--green-bg); border: 1px solid var(--border2);
-  font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: 0.5px;
-  margin-bottom: 20px;
-  animation: fadeUp 0.5s 0.05s var(--spring) both;
-}
-.hero-eyebrow svg { width: 11px; height: 11px; }
-
-.hero-title {
-  font-size: clamp(32px, 4vw, 52px);
-  font-weight: 700; letter-spacing: -1.5px; line-height: 1.05;
-  color: var(--fg); margin-bottom: 14px;
-  animation: fadeUp 0.5s 0.1s var(--spring) both;
-}
-.hero-title em { color: var(--green); font-style: normal; }
-
-.hero-desc {
-  font-size: 14.5px; color: var(--fg2); max-width: 500px; line-height: 1.7;
-  margin-bottom: 24px;
-  animation: fadeUp 0.5s 0.15s var(--spring) both;
-}
-
-.hero-badges {
-  display: flex; gap: 8px; flex-wrap: wrap;
-  animation: fadeUp 0.5s 0.2s var(--spring) both;
-}
-.badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 999px;
-  font-size: 11px; font-family: var(--mono); letter-spacing: 0.3px;
-  border: 1px solid var(--border2); background: var(--surface);
-}
-.badge svg { width: 11px; height: 11px; }
-.badge-green { color: var(--green); border-color: rgba(74,222,128,0.2); background: var(--green-bg); }
-.badge-blue  { color: var(--blue);  border-color: rgba(147,197,253,0.2); background: rgba(147,197,253,0.05); }
-.badge-dim   { color: var(--fg2);   border-color: var(--border2);        background: var(--surface2); }
-
-.page-header {
-  padding: 36px 44px 28px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.page-eyebrow {
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase; color: var(--green);
-  opacity: 0.7; margin-bottom: 8px;
-  display: flex; align-items: center; gap: 6px;
-  animation: fadeUp 0.4s var(--spring) both;
-}
-.page-eyebrow svg { width: 10px; height: 10px; }
-.page-title {
-  font-size: clamp(24px, 3.5vw, 38px);
-  font-weight: 700; letter-spacing: -0.8px; line-height: 1.1;
-  color: var(--fg);
-  animation: fadeUp 0.4s 0.05s var(--spring) both;
-}
-.page-desc {
-  font-size: 14px; color: var(--fg2); max-width: 560px;
-  margin-top: 8px; line-height: 1.7;
-  animation: fadeUp 0.4s 0.1s var(--spring) both;
+@media (max-width:800px){
+  #sidebar{position:fixed;top:var(--topbar-h);left:0;bottom:0;z-index:150;box-shadow:8px 0 40px rgba(0,0,0,0.4)}
+  #sidebar.hidden{transform:translateX(-100%);width:var(--sidebar-w);opacity:1}
+  #sidebar:not(.hidden){width:var(--sidebar-w);opacity:1;transform:translateX(0)}
+  .page-scroll{padding:20px 16px 32px}
+  .page-hero .hero-inner,.page-header{padding-left:16px;padding-right:16px}
+  #page-nav{padding:9px 16px}
+  .tb-mid{display:none}
+  .tb-right{display:none}
+  .gen-grid{grid-template-columns:1fr}
+  .gen-field.full{grid-column:1}
+  
+  .nav-btn{padding:10px 10px;min-height:40px}
+  .gen-input,.gen-select{padding:11px 12px;font-size:15px}
+  .toggle{width:42px;height:24px}
+  .toggle-slider::before{width:16px;height:16px}
+  .toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
+  .toggle-label{font-size:14px}
+  .gen-submit{padding:15px;font-size:16px}
+  .add-row-btn{padding:11px 14px;font-size:13px;min-height:44px}
+  
+  .provider-row{flex-wrap:wrap;gap:10px}
+  .editor-row{flex-wrap:wrap;gap:8px}
+  .editor-link-input{width:100%;max-width:none}
+  
+  .color-swatch{width:32px;height:32px}
+  .color-rgb-input{padding:9px 6px;font-size:13px}
+  
+  .instr-row{flex-wrap:wrap}
+  .instr-fields{min-width:0;width:100%}
+  
+  .cl-version-fields{flex-direction:column;gap:5px}
+  
+  .dl-btns{flex-direction:column}
+  .dl-btn{justify-content:center;padding:12px 16px}
+  .gen-reset{width:100%;justify-content:center;padding:12px 16px}
+  
+  pre.cb-pre{font-size:11px}
+  .cb-btn{padding:5px 10px}
+  
+  .pnav-dots{max-width:160px}
 }
 
-.doc-content { padding-top: 28px; }
-
-h3 {
-  font-size: 16px; font-weight: 600; letter-spacing: -0.3px; color: var(--fg);
-  margin: 32px 0 12px;
-  display: flex; align-items: center; gap: 8px;
-}
-h3 svg { width: 15px; height: 15px; color: var(--green); flex-shrink: 0; }
-h3::after { content:''; flex:1; height:1px; background:var(--border); max-width:120px; }
-
-p { font-size: 14px; color: var(--fg2); margin-bottom: 12px; line-height: 1.75; }
-code {
-  font-family: var(--mono); font-size: 12px;
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 4px; padding: 1px 5px; color: var(--orange);
-}
-
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 20px;
-  margin-bottom: 14px;
-  transition: border-color 0.2s;
-}
-.card:hover { border-color: var(--border2); }
-
-.prop-table {
-  width: 100%; border-collapse: collapse;
-  margin: 12px 0 24px; font-size: 13px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-}
-.prop-table thead tr { background: var(--surface2); }
-.prop-table th {
-  font-family: var(--mono); font-size: 9.5px; text-transform: uppercase;
-  letter-spacing: 1.2px; color: var(--fg3); font-weight: 600;
-  padding: 9px 14px; text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-.prop-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-.prop-table tbody tr:last-child { border-bottom: none; }
-.prop-table tbody tr:hover { background: rgba(74,222,128,0.02); }
-.prop-table td { padding: 10px 14px; vertical-align: top; line-height: 1.55; }
-.pname { font-family: var(--mono); font-size: 12px; color: var(--green); font-weight: 500; white-space: nowrap; }
-.ptype { font-family: var(--mono); font-size: 11px; color: var(--purple); white-space: nowrap; }
-.pdesc { color: var(--fg2); font-size: 13px; }
-
-.codeblock {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden; margin: 14px 0;
-}
-.cb-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface2);
-}
-.cb-lang {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 10.5px; color: var(--fg3);
-  letter-spacing: 0.5px;
-}
-.cb-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; opacity: 0.8; }
-.copy-btn {
-  display: flex; align-items: center; gap: 5px;
-  background: transparent; border: 1px solid var(--border2);
-  border-radius: var(--radius-sm); padding: 3px 10px;
-  font-family: var(--mono); font-size: 10px; color: var(--fg3);
-  cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px;
-}
-.copy-btn svg { width: 11px; height: 11px; }
-.copy-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
-pre {
-  padding: 16px 18px; overflow-x: auto;
-  font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #94b894;
-}
-pre::-webkit-scrollbar { height: 3px; }
-pre::-webkit-scrollbar-thumb { background: var(--border2); }
-.kw   { color: #f97583; } .str { color: #9ecfb8; } .num  { color: #79c0ff; }
-.fn   { color: #b8d4a0; } .cm  { color: #4a5e4a; font-style:italic; }
-.key  { color: #dda678; } .bool{ color: #f97583; }
-
-.callout {
-  display: flex; gap: 12px; padding: 12px 16px;
-  border-left: 2px solid; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin: 14px 0; font-size: 13px; line-height: 1.65;
-  background: var(--surface);
-}
-.callout-icon { flex-shrink: 0; margin-top: 1px; }
-.callout-icon svg { width: 14px; height: 14px; }
-.callout strong { font-weight: 600; }
-.callout.tip  { border-color: var(--green); color: #a8d8a8; }
-.callout.tip .callout-icon svg  { color: var(--green); }
-.callout.warn { border-color: var(--amber); color: #d4b87a; }
-.callout.warn .callout-icon svg { color: var(--amber); }
-.callout.info { border-color: var(--blue);  color: #93b8d4; }
-.callout.info .callout-icon svg { color: var(--blue);  }
-
-.steps { display: flex; flex-direction: column; gap: 2px; margin: 16px 0 24px; }
-.step {
-  display: flex; gap: 16px;
-  padding: 14px 16px;
-  border-radius: var(--radius-sm);
-  transition: background 0.15s;
-  position: relative;
-}
-.step:hover { background: rgba(74,222,128,0.02); }
-.step-num {
-  width: 28px; height: 28px; flex-shrink: 0;
-  background: var(--green-bg); border: 1px solid var(--border2);
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--green);
-  margin-top: 1px;
-}
-.step-title {
-  font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 3px;
-}
-.step-desc { font-size: 13px; color: var(--fg2); line-height: 1.65; }
-
-.tags-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-.tags-table tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-.tags-table tr:hover { background: rgba(74,222,128,0.02); }
-.tags-table td { padding: 10px 14px; font-size: 13px; }
-.tag {
-  display: inline-flex; align-items: center;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.8px; padding: 2px 8px; border-radius: 4px;
-  text-transform: uppercase; border: 1px solid;
-}
-.tag-new  { color: var(--green); border-color: rgba(74,222,128,0.3);  background: rgba(74,222,128,0.1);  }
-.tag-fix  { color: var(--red);   border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.1); }
-.tag-imp  { color: var(--blue);  border-color: rgba(147,197,253,0.3); background: rgba(147,197,253,0.1); }
-.tag-rem  { color: var(--orange);border-color: rgba(253,186,116,0.3); background: rgba(253,186,116,0.1); }
-.tag-sec  { color: var(--amber); border-color: rgba(252,211,77,0.3);  background: rgba(252,211,77,0.1);  }
-
-.divider { height: 1px; background: var(--border); margin: 28px 0; }
-
-.img-showcase {
-  position: relative; overflow: hidden;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color 0.25s, box-shadow 0.25s;
-  perspective: 800px;
-}
-.img-showcase:hover {
-  border-color: var(--border3);
-  box-shadow: 0 8px 40px rgba(74,222,128,0.08);
-}
-.img-showcase img { width: 100%; display: block; transition: transform 0.08s ease; border-radius: calc(var(--radius) - 1px); }
-.img-overlay { position:absolute;inset:0;border-radius:calc(var(--radius) - 1px);pointer-events:none; }
-.img-hint {
-  position: absolute; bottom: 10px; right: 10px;
-  background: rgba(8,16,10,0.85); backdrop-filter: blur(8px);
-  border: 1px solid var(--border2); border-radius: var(--radius-sm);
-  color: var(--green); padding: 4px 10px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
-  opacity: 0; transition: opacity 0.2s;
-  pointer-events: none; display: flex; align-items: center; gap: 5px;
-}
-.img-hint svg { width: 10px; height: 10px; }
-.img-showcase:hover .img-hint { opacity: 1; }
-
-#lightbox {
-  position: fixed; inset: 0; z-index: 900;
-  background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; opacity: 0; pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-#lightbox.open { opacity: 1; pointer-events: all; }
-#lightbox img {
-  max-width: 88vw; max-height: 86vh;
-  border-radius: var(--radius);
-  border: 1px solid var(--border2);
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
-  cursor: default; transition: transform 0.08s ease;
-}
-#lb-close {
-  position: absolute; top: 20px; right: 20px;
-  width: 36px; height: 36px;
-  background: var(--surface); border: 1px solid var(--border2); border-radius: 999px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--fg2); transition: all 0.15s;
-}
-#lb-close svg { width: 15px; height: 15px; }
-#lb-close:hover { background: var(--surface2); border-color: var(--border3); color: var(--fg); }
-
-#page-nav {
-  flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 44px;
-  border-top: 1px solid var(--border);
-  background: rgba(8,16,10,0.6); backdrop-filter: blur(8px);
-  gap: 12px;
-}
-.pnav-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 16px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  font-size: 13px; font-weight: 500; color: var(--fg2);
-  cursor: pointer; transition: all 0.15s;
-}
-.pnav-btn svg { width: 13px; height: 13px; }
-.pnav-btn:hover:not(:disabled) {
-  color: var(--green); border-color: var(--border3);
-  background: var(--green-bg); transform: translateY(-1px);
-}
-.pnav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.pnav-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.pnav-dots { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: 180px; }
-.pnav-dot {
-  width: 5px; height: 5px; background: var(--border2); border-radius: 50%;
-  cursor: pointer; transition: all 0.2s var(--spring);
-}
-.pnav-dot:hover:not(.active) { background: var(--fg3); transform: scale(1.2); }
-.pnav-dot.active { background: var(--green); transform: scale(1.4); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
-.pnav-label { font-size: 11px; color: var(--fg3); font-family: var(--mono); letter-spacing: 0.3px; }
-
-#sb-overlay { display:none; position:fixed; inset:0; top:54px; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:140; }
-#sb-overlay.visible { display:block; }
-
-@media (max-width: 800px) {
-  #sidebar {
-    position: fixed; top: 54px; left: 0; bottom: 0; z-index: 150;
-    box-shadow: 8px 0 40px rgba(0,0,0,0.4);
-  }
-  #sidebar.hidden { transform: translateX(-100%); width: var(--sidebar-w); opacity: 1; }
-  #sidebar:not(.hidden) { width: var(--sidebar-w); opacity: 1; transform: translateX(0); }
-  .page-scroll { padding: 24px 20px 32px; }
-  .page-hero .hero-inner, .page-header { padding-left: 20px; padding-right: 20px; }
-  #page-nav { padding: 10px 20px; }
-  .tb-mid { display: none; }
-  .tb-right { display: none; }
-}
-@media (max-width: 520px) {
-  #page-nav { flex-direction: column; gap: 10px; }
-  .pnav-btn { width: 100%; justify-content: center; }
-  .h-links { flex-direction: column; }
+@media (max-width:520px){
+  :root{--topbar-h:48px}
+  #page-nav{flex-direction:row;gap:8px;padding:8px 12px}
+  .pnav-btn{padding:8px 14px;font-size:12px}
+  .pnav-btn svg{width:12px;height:12px}
+  .pnav-dots{max-width:110px}
+  .h-btns{flex-direction:column;width:100%;max-width:280px}
+  .h-btn-p,.h-btn-s{width:100%;justify-content:center}
+  
+  .tb-name{font-size:13px}
+  .tb-mark{width:26px;height:26px}
+  .tb-logo{padding:0 12px;gap:8px}
+  #sb-toggle{padding:0 10px;font-size:12px}
+  #sb-toggle span{display:none}
+  
+  .page-title{font-size:clamp(18px,5vw,28px)}
+  .hero-title{font-size:clamp(24px,6vw,38px)}
+  .hero-desc{font-size:13px}
+  
+  .step{padding:10px 10px}
+  .step-num{width:24px;height:24px;font-size:10px}
+  
+  .prop-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  
+  .gen-section-title{font-size:11px}
+  
+  .toggle-row{gap:12px}
+  
+  .gen-input,.gen-select{font-size:16px}
+  
+  .color-rgb-row{flex-wrap:wrap;gap:8px}
+  .color-rgb-label{width:100%}
+  .color-rgb-inputs{flex:1}
+  
+  .instr-title-input,.instr-body-input{font-size:15px}
+  
+  .cl-version-input{font-size:14px;padding:7px 8px}
+  
+  .dl-btns{gap:10px}
+  
+  .pnav-label{font-size:10px}
+  
+  .line-nums{display:none}
+  pre.cb-pre{padding:12px 10px;font-size:10.5px}
 }
 </style>
 </head>
@@ -725,105 +485,51 @@ pre::-webkit-scrollbar-thumb { background: var(--border2); }
   <div class="h-glow"></div>
   <div class="h-orb h-orb-1"></div>
   <div class="h-orb h-orb-2"></div>
-
   <div class="h-content">
-    <div class="h-tag">
-      <div class="h-tag-dot"></div>
-      Roblox Config Documentation
+    <div class="h-badge"><div class="h-dot"></div>Roblox Config Documentation</div>
+    <div class="h-title">Havoc<span class="h-accent">Preset</span></div>
+    <div class="h-sub">Tutorial &amp; Configuration Reference</div>
+    <div class="h-btns">
+      <button class="h-btn-p" onclick="enterApp()"><i data-lucide="book-open"></i><span>Open Docs</span></button>
+      <a class="h-btn-s" href="https://jnkie.com" target="_blank" rel="noopener"><i data-lucide="globe"></i><span>jnkie.com</span></a>
+      <a class="h-btn-s" href="https://discord.gg/jnkie" target="_blank" rel="noopener"><i data-lucide="message-circle"></i><span>Discord</span></a>
     </div>
-
-    <div class="h-title">
-      Havoc
-      <span class="h-title-accent">Preset</span>
-    </div>
-
-    <div class="h-sub">Tutorial & Configuration Reference</div>
-
     <div class="h-links">
-      <button class="h-btn-primary" onclick="enterApp()">
-        <i data-lucide="book-open"></i>
-        <span>Open Docs</span>
-      </button>
-      <a class="h-btn-secondary" href="https://jnkie.com" target="_blank" rel="noopener">
-        <i data-lucide="globe"></i>
-        <span>jnkie.com</span>
-      </a>
-      <a class="h-btn-secondary" href="https://discord.gg/jnkie" target="_blank" rel="noopener">
-        <i data-lucide="message-circle"></i>
-        <span>discord.gg/jnkie</span>
-      </a>
-    </div>
-
-    <div class="h-socials">
-      <a class="h-social-link" href="https://jnkie.com" target="_blank" rel="noopener">
-        <i data-lucide="globe"></i> jnkie.com
-      </a>
-      <div class="h-divider"></div>
-      <a class="h-social-link" href="https://discord.gg/jnkie" target="_blank" rel="noopener">
-        <i data-lucide="users"></i> Community
-      </a>
-      <div class="h-divider"></div>
-      <span class="h-social-link" style="cursor:default;">
-        <i data-lucide="key-round"></i> Havoc Preset v1.0
-      </span>
+      <a class="h-link" href="https://jnkie.com" target="_blank"><i data-lucide="globe"></i>jnkie.com</a>
+      <div class="h-sep"></div>
+      <a class="h-link" href="https://discord.gg/jnkie" target="_blank"><i data-lucide="users"></i>Community</a>
+      <div class="h-sep"></div>
+      <span class="h-link" style="cursor:default"><i data-lucide="key-round"></i>v1.0</span>
     </div>
   </div>
 </div>
 
 <div id="app">
-  <div id="bar"></div>
   <div id="sb-overlay" onclick="closeSbMobile()"></div>
-
-  
   <header id="topbar">
-    <a href="#" class="tb-logo" onclick="return false;">
-      <div class="tb-logo-mark"><i data-lucide="key-round"></i></div>
-      <div>
-        <div class="tb-name">Havoc Preset</div>
-        <div class="tb-domain">jnkie.com</div>
-      </div>
+    <a href="#" class="tb-logo" onclick="return false">
+      <div class="tb-mark"><i data-lucide="key-round"></i></div>
+      <div><div class="tb-name">Havoc Preset</div><div class="tb-ver">jnkie.com</div></div>
     </a>
-
-    <button id="sb-toggle" onclick="toggleSidebar()">
-      <i data-lucide="sidebar"></i>
-      <span>Tabs</span>
-    </button>
-
+    <button id="sb-toggle" onclick="toggleSidebar()"><i data-lucide="sidebar"></i><span>Tabs</span></button>
     <div class="tb-mid">
-      <div class="tb-search">
-        <i data-lucide="search"></i>
-        <input type="text" id="tab-search" placeholder="Search tabs…" oninput="filterTabs(this.value)">
-      </div>
-      <div class="tb-breadcrumb">
-        <i data-lucide="chevron-right"></i>
-        <span class="tb-breadcrumb-curr" id="breadcrumb">Overview</span>
-      </div>
+      <div class="tb-search"><i data-lucide="search"></i><input type="text" id="tab-search" placeholder="Search tabs…" oninput="filterTabs(this.value)"></div>
+      <div class="tb-bc"><i data-lucide="chevron-right"></i><span class="tb-bc-curr" id="breadcrumb">Overview</span></div>
     </div>
-
-    <div class="tb-right">
-      <div class="tb-status-pill">
-        <div class="tb-status-dot"></div>
-        Live
-      </div>
-    </div>
+    <div class="tb-right"><div class="tb-pill"><div class="tb-pill-dot"></div>Live</div></div>
   </header>
 
-  
   <div id="body">
-
-    
     <aside id="sidebar">
       <div class="sb-inner">
-
-        <div class="nav-section">
-          <div class="nav-section-label">Start</div>
+        <div class="nav-sec">
+          <div class="nav-sec-label">Start</div>
           <button class="nav-btn active" onclick="goTo(0)" data-label="Overview" data-idx="0"><i data-lucide="book-open"></i>Overview</button>
           <button class="nav-btn" onclick="goTo(1)" data-label="How It Works" data-idx="1"><i data-lucide="git-branch"></i>How It Works</button>
           <button class="nav-btn" onclick="goTo(2)" data-label="Minimal Template" data-idx="2"><i data-lucide="file-code"></i>Minimal Template</button>
         </div>
-
-        <div class="nav-section">
-          <div class="nav-section-label">Configuration</div>
+        <div class="nav-sec">
+          <div class="nav-sec-label">Configuration</div>
           <button class="nav-btn" onclick="goTo(3)" data-label="Junkie Configs" data-idx="3"><i data-lucide="settings-2"></i>Junkie Configs</button>
           <button class="nav-btn sub" onclick="goTo(4)" data-label="Providers" data-idx="4"><i data-lucide="link-2"></i>Providers</button>
           <button class="nav-btn sub" onclick="goTo(5)" data-label="GameSupport" data-idx="5"><i data-lucide="gamepad-2"></i>GameSupport</button>
@@ -837,18 +543,19 @@ pre::-webkit-scrollbar-thumb { background: var(--border2); }
           <button class="nav-btn sub" onclick="goTo(13)" data-label="Instructions" data-idx="13"><i data-lucide="list-ordered"></i>Instructions</button>
           <button class="nav-btn sub" onclick="goTo(14)" data-label="Changelog Config" data-idx="14"><i data-lucide="history"></i>Changelog</button>
         </div>
-
-        <div class="nav-section">
-          <div class="nav-section-label">Reference</div>
+        <div class="nav-sec">
+          <div class="nav-sec-label">Reference</div>
           <button class="nav-btn" onclick="goTo(15)" data-label="Changelog Tags" data-idx="15"><i data-lucide="tag"></i>Changelog Tags</button>
           <button class="nav-btn" onclick="goTo(16)" data-label="Full Config Example" data-idx="16"><i data-lucide="code-2"></i>Full Example</button>
         </div>
-
-        <div class="nav-section">
-          <div class="nav-section-label">Media</div>
-          <button class="nav-btn" onclick="goTo(17)" data-label="UI Showcase" data-idx="17"><i data-lucide="image"></i>UI Showcase</button>
+        <div class="nav-sec">
+          <div class="nav-sec-label">Tools</div>
+          <button class="nav-btn" onclick="goTo(17)" data-label="Code Generator" data-idx="17"><i data-lucide="wand-2"></i>Code Generator</button>
         </div>
-
+        <div class="nav-sec">
+          <div class="nav-sec-label">Media</div>
+          <button class="nav-btn" onclick="goTo(18)" data-label="UI Showcase" data-idx="18"><i data-lucide="image"></i>UI Showcase</button>
+        </div>
       </div>
       <div class="sb-footer">
         <span class="sb-footer-text">Made by <span>Havoc</span></span>
@@ -856,7 +563,6 @@ pre::-webkit-scrollbar-thumb { background: var(--border2); }
       </div>
     </aside>
 
-    
     <div id="pages">
 
       
@@ -873,88 +579,91 @@ pre::-webkit-scrollbar-thumb { background: var(--border2); }
               <span class="badge badge-blue"><i data-lucide="monitor"></i> Roblox UI</span>
               <span class="badge badge-dim"><i data-lucide="globe"></i> jnkie.com</span>
             </div>
-
-            <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
-              <a href="https://jnkie.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-weight:500;color:var(--fg2);text-decoration:none;transition:all 0.2s;" onmouseover="this.style.color='var(--fg)';this.style.borderColor='var(--border3)'" onmouseout="this.style.color='var(--fg2)';this.style.borderColor='var(--border2)'">
-                <i data-lucide="globe" style="width:14px;height:14px;"></i> Visit jnkie.com
-              </a>
-              <a href="https://discord.gg/jnkie" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(88,101,242,0.08);border:1px solid rgba(88,101,242,0.2);border-radius:var(--radius);font-size:13px;font-weight:500;color:#a5b4fc;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(88,101,242,0.15)'" onmouseout="this.style.background='rgba(88,101,242,0.08)'">
-                <i data-lucide="message-circle" style="width:14px;height:14px;"></i> Join Discord
-              </a>
+            <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+              <a href="https://jnkie.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-weight:500;color:var(--fg2);text-decoration:none;transition:all 0.2s" onmouseover="this.style.color='var(--fg)';this.style.borderColor='var(--border3)'" onmouseout="this.style.color='var(--fg2)';this.style.borderColor='var(--border2)'"><i data-lucide="globe" style="width:14px;height:14px"></i>Visit jnkie.com</a>
+              <a href="https://discord.gg/jnkie" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(88,101,242,0.08);border:1px solid rgba(88,101,242,0.2);border-radius:var(--radius);font-size:13px;font-weight:500;color:#a5b4fc;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(88,101,242,0.15)'" onmouseout="this.style.background='rgba(88,101,242,0.08)'"><i data-lucide="message-circle" style="width:14px;height:14px"></i>Join Discord</a>
             </div>
           </div>
         </div>
-        <div class="page-scroll">
-          <div class="doc-content">
-            <div class="card">
-              <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:7px;">
-                <i data-lucide="info" style="width:14px;height:14px;color:var(--green);"></i>
-                What is Havoc Preset?
-              </div>
-              <p style="margin:0;font-size:13.5px;">Havoc Preset is a Roblox key system UI library. Loaded externally via <code>loadstring</code> and configured entirely from your own script. When a valid key is redeemed, it sets <code>getgenv().LOAD = true</code> and your game script continues.</p>
-            </div>
-            <div class="callout tip">
-              <div class="callout-icon"><i data-lucide="check-circle-2"></i></div>
-              <div><strong>Tip —</strong> The library is CDN-hosted. You only write a loader script with your config — Jnkie.com handles the library internals. Never modify the library directly.</div>
-            </div>
+        <div class="page-scroll"><div class="doc-content">
+          <div class="card">
+            <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:7px"><i data-lucide="info" style="width:14px;height:14px;color:var(--green)"></i>What is Havoc Preset?</div>
+            <p style="margin:0;font-size:13.5px">Havoc Preset is a Roblox key system UI library. Loaded externally via <code>loadstring</code> and configured entirely from your own script. Once a valid key is redeemed (or auto-loaded from file), <code>getgenv().SCRIPT_KEY</code> is set and your game script continues. The library also returns itself as <code>Hub</code>.</p>
           </div>
-        </div>
+          <div class="callout tip"><div class="callout-icon"><i data-lucide="check-circle-2"></i></div><div><strong>Tip —</strong> The library is CDN-hosted. You write a loader with <code>Junkie_Configs</code> and <code>UI_Configs</code>, merge them into <code>Config</code>, and call <code>Hub.new(Config):Init()</code>. Use the <strong>Code Generator</strong> tab to have your config written for you automatically.</div></div>
+        </div></div>
       </div>
 
       
       <div class="page" data-idx="1">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="git-branch"></i> 02 — Flow</div>
-          <div class="page-title">How It Works</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="git-branch"></i> 02 — Flow</div><div class="page-title">How It Works</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="steps">
-            <div class="step"><div class="step-num">1</div><div><div class="step-title">Load the Library</div><div class="step-desc">Your script calls <code>loadstring(game:HttpGet(LIBRARY_URL))()</code> — fetches the library from CDN and returns a Hub object.</div></div></div>
-            <div class="step"><div class="step-num">2</div><div><div class="step-title">Configure &amp; Init</div><div class="step-desc">Pass your <code>Config</code> to <code>Hub.new(Config)</code> then call <code>hub:Init()</code> to render the key system UI.</div></div></div>
-            <div class="step"><div class="step-num">3</div><div><div class="step-title">Wait for Redemption</div><div class="step-desc"><code>while not getgenv().LOAD do task.wait(1) end</code> blocks until a valid key is entered, then execution continues.</div></div></div>
+            <div class="step"><div class="step-num">1</div><div><div class="step-title">Load the Library</div><div class="step-desc">Your script calls <code>loadstring(game:HttpGet(LIBRARY_URL))()</code> inside a <code>pcall</code> to fetch the Hub library from CDN.</div></div></div>
+            <div class="step"><div class="step-num">2</div><div><div class="step-title">Auto-Login Check</div><div class="step-desc"><code>TryAutoLogin()</code> runs first — it checks for a saved key in <code>KeyFile</code> or <code>getgenv().SCRIPT_KEY</code> and validates via Junkie SDK. If valid, the UI is skipped entirely.</div></div></div>
+            <div class="step"><div class="step-num">3</div><div><div class="step-title">Show UI if Needed</div><div class="step-desc">If auto-login fails, <code>Hub.new(Config)</code> and <code>hub:Init()</code> render the key system UI for the user to enter their key.</div></div></div>
+            <div class="step"><div class="step-num">4</div><div><div class="step-title">Wait for Key</div><div class="step-desc"><code>while not getgenv().SCRIPT_KEY do task.wait(0.1) end</code> blocks until a valid key is entered. Your game script runs below that line.</div></div></div>
           </div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="2">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="file-code"></i> 03 — Template</div>
-          <div class="page-title">Minimal Template</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="file-code"></i> 03 — Template</div><div class="page-title">Minimal Template</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="codeblock">
-            <div class="cb-header"><div class="cb-lang"><div class="cb-dot"></div>Lua</div><button class="copy-btn" onclick="copyCode(this)"><i data-lucide="copy"></i> Copy</button></div>
-<pre><span class="kw">local</span> system = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>))()
-<span class="kw">local</span> Config = { <span class="cm">-- your config here</span> }
-<span class="kw">local</span> hub = system.<span class="fn">new</span>(Config)
-hub:<span class="fn">Init</span>()
-<span class="kw">while</span> <span class="kw">not</span> <span class="fn">getgenv</span>().<span class="key">LOAD</span> <span class="kw">do</span>
-  task.<span class="fn">wait</span>(<span class="num">1</span>)
+            <div class="cb-header">
+              <div class="cb-left"><div class="cb-dots"><div class="cb-dot-r"></div><div class="cb-dot-y"></div><div class="cb-dot-g"></div></div><div class="cb-lang">Lua — Minimal Template</div></div>
+              <div class="cb-actions">
+                <button class="cb-btn" onclick="copyRaw(this)"><i data-lucide="copy"></i>Copy Raw</button>
+              </div>
+            </div>
+            <div class="cb-wrap"><div class="cb-lines">
+              <div class="line-nums" id="ln-2"></div>
+<pre class="cb-pre" id="pre-2"><span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="bool">nil</span>
+
+<span class="kw">local</span> Junkie_Configs = { }
+<span class="kw">local</span> UI_Configs     = { }
+<span class="kw">local</span> Config = { }
+
+<span class="kw">local</span> Hub
+<span class="fn">pcall</span>(<span class="kw">function</span>()
+  <span class="kw">local</span> src = <span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>)
+  <span class="kw">if</span> #src &lt; <span class="num">100</span> <span class="kw">then return end</span>
+  Hub = <span class="fn">loadstring</span>(src)()
+<span class="kw">end</span>)
+<span class="kw">if</span> <span class="fn">type</span>(Hub) ~= <span class="str">"table"</span> <span class="kw">then return end</span>
+
+<span class="kw">local</span> autoLogin = TryAutoLogin()
+<span class="kw">if not</span> autoLogin <span class="kw">then</span>
+  <span class="fn">pcall</span>(<span class="kw">function</span>()
+    <span class="kw">local</span> hub = Hub.<span class="fn">new</span>(Config)
+    hub:<span class="fn">Init</span>()
+  <span class="kw">end</span>)
 <span class="kw">end</span>
-<span class="cm">-- game script runs here</span></pre>
+
+<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> <span class="kw">do</span>
+  task.<span class="fn">wait</span>(<span class="num">0.1</span>)
+<span class="kw">end</span></pre>
+            </div></div>
           </div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="3">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="settings-2"></i> 04 — Core</div>
-          <div class="page-title">Junkie_Configs</div>
-          <div class="page-desc">Controls Junkie SDK integration — key validation, webhook relay, and provider setup.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="settings-2"></i> 04 — Core</div><div class="page-title">Junkie_Configs</div><div class="page-desc">Controls Junkie SDK integration — key validation, webhook relay, and provider setup.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">UseJunkie</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> loads the Junkie SDK for real-time key validation. <code>false</code> accepts any key (testing mode).</td></tr>
-              <tr><td class="pname">Junkie_Webhook</td><td class="ptype">string</td><td class="pdesc">Your Junkie relay webhook URL. Notifies you on key redemption. Leave <code>""</code> to disable.</td></tr>
-              <tr><td class="pname">Service</td><td class="ptype">string</td><td class="pdesc">Your service name from the Junkie dashboard. Must match exactly.</td></tr>
-              <tr><td class="pname">Identifier</td><td class="ptype">string</td><td class="pdesc">Your user/dashboard identifier from Junkie.</td></tr>
-              <tr><td class="pname">Provider</td><td class="ptype">string</td><td class="pdesc">The provider name configured in your Junkie dashboard.</td></tr>
-              <tr><td class="pname">MaxKeyAttempts</td><td class="ptype">number</td><td class="pdesc">Failed attempts before UI force-closes. Recommended: <code>5</code>.</td></tr>
-              <tr><td class="pname">Premium</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> loads the Premium script URL from GameSupport instead of Free.</td></tr>
+              <tr><td class="pname">UseJunkie</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> loads the Junkie SDK for real-time key validation. <code>false</code> accepts any key (testing mode).</td></tr>
+              <tr><td class="pname">Junkie_Webhook</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Your Junkie relay webhook URL. Notifies you on key redemption. Leave <code>""</code> to disable.</td></tr>
+              <tr><td class="pname">Service</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Your service name from the Junkie dashboard. Must match exactly.</td></tr>
+              <tr><td class="pname">Identifier</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Your user/dashboard identifier from Junkie.</td></tr>
+              <tr><td class="pname">Provider</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">The provider name configured in your Junkie dashboard.</td></tr>
+              <tr><td class="pname">MaxKeyAttempts</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Failed attempts before UI force-closes. Recommended: <code>5</code>.</td></tr>
+              <tr><td class="pname">Premium</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> loads the Premium script URL from GameSupport instead of Free.</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -962,41 +671,35 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="4">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="link-2"></i> Providers</div>
-          <div class="page-title">Providers</div>
-          <div class="page-desc">Array of key provider buttons shown in the UI. Each can be shown, hidden, or pinned.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="link-2"></i> Providers</div><div class="page-title">Providers</div><div class="page-desc">Array of key provider buttons shown in the UI. Each can be shown, hidden, or pinned.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Name</td><td class="ptype">string</td><td class="pdesc">Display name on the provider button.</td></tr>
-              <tr><td class="pname">Icon</td><td class="ptype">string</td><td class="pdesc">rbxassetid for the icon. Use <code>"rbxassetid://0"</code> for the built-in default.</td></tr>
-              <tr><td class="pname">Url</td><td class="ptype">string</td><td class="pdesc">URL opened on click. Fallback if <code>get_key_link()</code> returns nil.</td></tr>
-              <tr><td class="pname">Show</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = visible.</td></tr>
-              <tr><td class="pname">IsJunkie</td><td class="ptype">boolean</td><td class="pdesc">Exactly ONE provider should have this. Enables SDK's <code>get_key_link()</code> flow.</td></tr>
-              <tr><td class="pname">Pinned</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = rendered first with a highlight border.</td></tr>
+              <tr><td class="pname">Name</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Display name on the provider button.</td></tr>
+              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for the icon. Use <code>"rbxassetid://0"</code> for the built-in default.</td></tr>
+              <tr><td class="pname">Url</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">URL opened on click. Fallback if <code>get_key_link()</code> returns nil.</td></tr>
+              <tr><td class="pname">Show</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = visible in the UI.</td></tr>
+              <tr><td class="pname">IsJunkie</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc">Exactly ONE provider should have this. Enables SDK's <code>get_key_link()</code> flow.</td></tr>
+              <tr><td class="pname">Pinned</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = rendered first with a highlight border.</td></tr>
             </tbody>
           </table>
-          <div class="callout warn">
-            <div class="callout-icon"><i data-lucide="alert-triangle"></i></div>
-            <div><strong>Warning —</strong> Only one provider should have <code>IsJunkie = true</code>. If none, all providers render as regular URL buttons.</div>
-          </div>
+          <div class="callout warn"><div class="callout-icon"><i data-lucide="alert-triangle"></i></div><div><strong>Warning —</strong> Only one provider should have <code>IsJunkie = true</code>. If none, all providers render as regular URL buttons.</div></div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="5">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="gamepad-2"></i> GameSupport</div>
-          <div class="page-title">GameSupport</div>
-          <div class="page-desc">Maps Roblox Place IDs to script URLs. After key acceptance the matching script loads. <code>Universal</code> is required as a fallback.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="gamepad-2"></i> GameSupport</div><div class="page-title">GameSupport</div><div class="page-desc">Maps Roblox Place IDs to script URLs. After key acceptance the matching script loads. <code>Universal</code> is required as a fallback.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="codeblock">
-            <div class="cb-header"><div class="cb-lang"><div class="cb-dot"></div>Lua</div><button class="copy-btn" onclick="copyCode(this)"><i data-lucide="copy"></i> Copy</button></div>
-<pre><span class="key">GameSupport</span> = {
+            <div class="cb-header">
+              <div class="cb-left"><div class="cb-dots"><div class="cb-dot-r"></div><div class="cb-dot-y"></div><div class="cb-dot-g"></div></div><div class="cb-lang">Lua</div></div>
+              <div class="cb-actions"><button class="cb-btn" onclick="copyRaw(this)"><i data-lucide="copy"></i>Copy Raw</button></div>
+            </div>
+            <div class="cb-wrap"><div class="cb-lines">
+              <div class="line-nums" id="ln-5"></div>
+<pre class="cb-pre" id="pre-5"><span class="key">GameSupport</span> = {
   [<span class="num">2788229376</span>] = {
     <span class="key">Name</span>    = <span class="str">"Game Name Here"</span>,
     <span class="key">Free</span>    = <span class="str">"https://api.jnkie.com/.../HASH/download"</span>,
@@ -1008,47 +711,35 @@ hub:<span class="fn">Init</span>()
     <span class="key">Premium</span> = <span class="str">"https://api.jnkie.com/.../HASH/download"</span>,
   },
 }</pre>
+            </div></div>
           </div>
-          <div class="callout warn">
-            <div class="callout-icon"><i data-lucide="alert-triangle"></i></div>
-            <div><strong>Warning —</strong> Replace all <code>HASH</code> placeholders with your actual Junkie script hashes. The <code>Universal</code> entry is required as a fallback.</div>
-          </div>
+          <div class="callout warn"><div class="callout-icon"><i data-lucide="alert-triangle"></i></div><div><strong>Warning —</strong> Replace all <code>HASH</code> placeholders with your actual Junkie script hashes. The <code>Universal</code> entry is required as a fallback.</div></div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="6">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="palette"></i> 05 — Visual</div>
-          <div class="page-title">UI_Configs</div>
-          <div class="page-desc">Controls the visual appearance and behaviour of the key system UI. Split into focused sub-sections below.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="palette"></i> 05 — Visual</div><div class="page-title">UI_Configs</div><div class="page-desc">Controls the visual appearance and behaviour of the key system UI.</div></div>
         <div class="page-scroll"><div class="doc-content">
-          <div class="callout info">
-            <div class="callout-icon"><i data-lucide="info"></i></div>
-            <div>Navigate using the sidebar or Next button to reach General, Background, Snow, Key System, Discord, Socials, Instructions, and Changelog sub-sections.</div>
-          </div>
+          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div>Navigate using the sidebar or Next button to reach General, Background, Snow, Key System, Discord, Socials, Instructions, and Changelog sub-sections. Or use the <strong>Code Generator</strong> tab to configure everything visually.</div></div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="7">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="sliders-horizontal"></i> General</div>
-          <div class="page-title">General Settings</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="sliders-horizontal"></i> General</div><div class="page-title">General Settings</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Name</td><td class="ptype">string</td><td class="pdesc">Hub display name in the title section.</td></tr>
-              <tr><td class="pname">Version</td><td class="ptype">string</td><td class="pdesc">Version pill under the hub name. e.g. <code>"1.0"</code></td></tr>
-              <tr><td class="pname">Color</td><td class="ptype">Color3</td><td class="pdesc">Primary accent colour — buttons, borders, glows, badges.</td></tr>
-              <tr><td class="pname">Text_Color</td><td class="ptype">Color3 / ""</td><td class="pdesc">Text on coloured buttons. Leave <code>""</code> to auto-pick black/white.</td></tr>
-              <tr><td class="pname">Icon</td><td class="ptype">string</td><td class="pdesc">rbxassetid for your hub logo in the title bar.</td></tr>
-              <tr><td class="pname">BadgeText</td><td class="ptype">string</td><td class="pdesc">Badge label next to the icon. e.g. <code>"KEY SYSTEM"</code></td></tr>
-              <tr><td class="pname">CustomFont</td><td class="ptype">string</td><td class="pdesc">rbxassetid of a custom font. Leave <code>""</code> for built-in Gotham.</td></tr>
-              <tr><td class="pname">ShowOutline</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = accent-coloured border around the main panel.</td></tr>
+              <tr><td class="pname">Name</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Hub display name in the title section.</td></tr>
+              <tr><td class="pname">Version</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Version pill under the hub name. e.g. <code>"1.0"</code></td></tr>
+              <tr><td class="pname">Color</td><td><span class="ptype-pill ptype-color">Color3</span></td><td class="pdesc">Primary accent colour — buttons, borders, glows, badges.</td></tr>
+              <tr><td class="pname">Text_Color</td><td><span class="ptype-pill ptype-color">Color3/""</span></td><td class="pdesc">Text on coloured buttons. Leave <code>""</code> to auto-pick black/white.</td></tr>
+              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for your hub logo in the title bar.</td></tr>
+              <tr><td class="pname">BadgeText</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Badge label next to the icon. e.g. <code>"KEY SYSTEM"</code></td></tr>
+              <tr><td class="pname">CustomFont</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid of a custom font. Leave <code>""</code> for built-in Gotham.</td></tr>
+              <tr><td class="pname">ShowOutline</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = accent-coloured border around the main panel.</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -1056,21 +747,18 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="8">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="layers"></i> Background &amp; Overlay</div>
-          <div class="page-title">Background &amp; Overlay</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="layers"></i> Background &amp; Overlay</div><div class="page-title">Background &amp; Overlay</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">GradientAnimated</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = background gradient slowly rotates.</td></tr>
-              <tr><td class="pname">GradientAnimationSpeed</td><td class="ptype">number</td><td class="pdesc">Seconds per full rotation. Lower = faster.</td></tr>
-              <tr><td class="pname">GlassOpacity</td><td class="ptype">number</td><td class="pdesc">Panel transparency. <code>0</code> = opaque, <code>1</code> = invisible. <code>0.18</code> = frosted glass.</td></tr>
-              <tr><td class="pname">SlideInEnabled</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = panel slides up on open.</td></tr>
-              <tr><td class="pname">BlurEnabled</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = applies BlurEffect to Lighting while UI is open.</td></tr>
-              <tr><td class="pname">BlurSize</td><td class="ptype">number</td><td class="pdesc">Blur strength 0–56.</td></tr>
-              <tr><td class="pname">OverlayOpacity</td><td class="ptype">number</td><td class="pdesc">Background overlay darkness. <code>0</code> = none, <code>1</code> = black.</td></tr>
+              <tr><td class="pname">GradientAnimated</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = background gradient slowly rotates.</td></tr>
+              <tr><td class="pname">GradientAnimationSpeed</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Seconds per full rotation. Lower = faster.</td></tr>
+              <tr><td class="pname">GlassOpacity</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Panel transparency. <code>0</code> = opaque, <code>1</code> = invisible. <code>0.18</code> = frosted glass.</td></tr>
+              <tr><td class="pname">SlideInEnabled</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = panel slides up on open.</td></tr>
+              <tr><td class="pname">BlurEnabled</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = applies BlurEffect to Lighting while UI is open.</td></tr>
+              <tr><td class="pname">BlurSize</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Blur strength 0–56.</td></tr>
+              <tr><td class="pname">OverlayOpacity</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Background overlay darkness. <code>0</code> = none, <code>1</code> = black.</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -1078,18 +766,15 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="9">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="snowflake"></i> Snow</div>
-          <div class="page-title">Snow Settings</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="snowflake"></i> Snow</div><div class="page-title">Snow Settings</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">SnowEnabled</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = falling snowflake particles over the background.</td></tr>
-              <tr><td class="pname">SnowDensity</td><td class="ptype">number</td><td class="pdesc">Snowflake count multiplier. <code>1.0</code> = default.</td></tr>
-              <tr><td class="pname">SnowColor</td><td class="ptype">Color3</td><td class="pdesc">Snowflake colour.</td></tr>
-              <tr><td class="pname">SnowSize</td><td class="ptype">{Min, Max}</td><td class="pdesc">Pixel diameter range. e.g. <code>{Min=3, Max=7}</code></td></tr>
+              <tr><td class="pname">SnowEnabled</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = falling snowflake particles over the background.</td></tr>
+              <tr><td class="pname">SnowDensity</td><td><span class="ptype-pill ptype-num">number</span></td><td class="pdesc">Snowflake count multiplier. <code>1.0</code> = default.</td></tr>
+              <tr><td class="pname">SnowColor</td><td><span class="ptype-pill ptype-color">Color3</span></td><td class="pdesc">Snowflake colour.</td></tr>
+              <tr><td class="pname">SnowSize</td><td><span class="ptype-pill ptype-arr">{Min,Max}</span></td><td class="pdesc">Pixel diameter range. e.g. <code>{Min=3, Max=7}</code></td></tr>
             </tbody>
           </table>
         </div></div>
@@ -1097,36 +782,32 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="10">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="keyboard"></i> Key System</div>
-          <div class="page-title">Key System Settings</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="keyboard"></i> Key System</div><div class="page-title">Key System Settings</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">KeySystemLabel</td><td class="ptype">string</td><td class="pdesc">Label text above the key input box.</td></tr>
-              <tr><td class="pname">KeySystemPlaceholder</td><td class="ptype">string</td><td class="pdesc">Animated placeholder that types itself when the box is empty.</td></tr>
-              <tr><td class="pname">KeyFile</td><td class="ptype">string</td><td class="pdesc">Filename to save/load the verified key locally.</td></tr>
-              <tr><td class="pname">CloseOnSuccess</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = UI auto-closes after successful redeem.</td></tr>
-              <tr><td class="pname">SuccessMessage</td><td class="ptype">string</td><td class="pdesc">Toast shown on success. e.g. <code>"✓ Access Granted!"</code></td></tr>
+              <tr><td class="pname">KeySystemLabel</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Label text above the key input box.</td></tr>
+              <tr><td class="pname">KeySystemPlaceholder</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Animated placeholder that types itself when the box is empty.</td></tr>
+              <tr><td class="pname">KeyFile</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Filename used to save and reload a verified key. Leave <code>""</code> to disable.</td></tr>
+              <tr><td class="pname">CloseOnSuccess</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = UI auto-closes after successful redeem.</td></tr>
+              <tr><td class="pname">SuccessMessage</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Toast shown on success. e.g. <code>"✓ Access Granted!"</code></td></tr>
             </tbody>
           </table>
+          <div class="callout tip"><div class="callout-icon"><i data-lucide="check-circle-2"></i></div><div><strong>Auto-Login —</strong> On launch the library checks <code>KeyFile</code> against the Junkie SDK. If valid, the UI is never shown.</div></div>
+          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div><strong>KEYLESS mode —</strong> If Junkie returns <code>message == "KEYLESS"</code>, the library sets <code>getgenv().SCRIPT_KEY = "KEYLESS"</code> and proceeds without saving any file.</div></div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="11">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="message-square"></i> Discord</div>
-          <div class="page-title">Discord Settings</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="message-square"></i> Discord</div><div class="page-title">Discord Settings</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Discord</td><td class="ptype">string</td><td class="pdesc">Your invite code (part after <code>discord.gg/</code>). Powers the Join button and live member count.</td></tr>
-              <tr><td class="pname">ShowMemberCount</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = fetches and shows live member + online count.</td></tr>
+              <tr><td class="pname">Discord</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Your invite code (part after <code>discord.gg/</code>). Powers the Join button and live member count.</td></tr>
+              <tr><td class="pname">ShowMemberCount</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = fetches and shows live member + online count.</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -1134,72 +815,63 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="12">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="share-2"></i> Socials &amp; AppLinks</div>
-          <div class="page-title">Socials &amp; AppLinks</div>
-          <div class="page-desc">Both arrays share the same field structure.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="share-2"></i> Socials &amp; AppLinks</div><div class="page-title">Socials &amp; AppLinks</div><div class="page-desc">Both arrays share the same field structure.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Name</td><td class="ptype">string</td><td class="pdesc">Display name. Used to auto-resolve icon if <code>Icon</code> is <code>"rbxassetid://0"</code>.</td></tr>
-              <tr><td class="pname">Icon</td><td class="ptype">string</td><td class="pdesc">rbxassetid for the icon image.</td></tr>
-              <tr><td class="pname">Link</td><td class="ptype">string</td><td class="pdesc">URL copied to clipboard on click.</td></tr>
-              <tr><td class="pname">Show</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = visible.</td></tr>
-              <tr><td class="pname">Pinned</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = rendered first with a highlight border.</td></tr>
+              <tr><td class="pname">Name</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Display name. Used to auto-resolve icon if <code>Icon</code> is <code>"rbxassetid://0"</code>.</td></tr>
+              <tr><td class="pname">Icon</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">rbxassetid for the icon image.</td></tr>
+              <tr><td class="pname">Link</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">URL copied to clipboard on click.</td></tr>
+              <tr><td class="pname">Show</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = visible.</td></tr>
+              <tr><td class="pname">Pinned</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = rendered first with a highlight border.</td></tr>
             </tbody>
           </table>
-          <div class="callout info">
-            <div class="callout-icon"><i data-lucide="info"></i></div>
-            <div><strong>Auto-icons —</strong> Set <code>Icon</code> to <code>"rbxassetid://0"</code> for built-in icons: Discord, Twitter, YouTube, TikTok, Instagram, Telegram, Reddit, GitHub, Guilded, Patreon, Ko-fi, Twitch, V3rm, Website, Linkvertise, LootLabs, Work.ink, Shrtfly, Lockr, Cuty, ShrinkEarn, Rinku.</div>
-          </div>
+          <div class="callout info"><div class="callout-icon"><i data-lucide="info"></i></div><div><strong>Auto-icons —</strong> Set <code>Icon</code> to <code>"rbxassetid://0"</code> for built-in icons: Discord, Twitter, YouTube, TikTok, Instagram, Telegram, Reddit, GitHub, Guilded, Patreon, Ko-fi, Twitch, V3rm, Website, Linkvertise, LootLabs, Work.ink, Shrtfly, Lockr, Cuty, ShrinkEarn, Rinku.</div></div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="13">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="list-ordered"></i> Instructions</div>
-          <div class="page-title">Instructions</div>
-          <div class="page-desc">Step cards on the How-To page (opened via the <code>?</code> button).</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="list-ordered"></i> Instructions</div><div class="page-title">Instructions</div><div class="page-desc">Step cards on the How-To page (opened via the <code>?</code> button).</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="codeblock">
-            <div class="cb-header"><div class="cb-lang"><div class="cb-dot"></div>Lua</div><button class="copy-btn" onclick="copyCode(this)"><i data-lucide="copy"></i> Copy</button></div>
-<pre><span class="key">Instructions</span> = {
+            <div class="cb-header">
+              <div class="cb-left"><div class="cb-dots"><div class="cb-dot-r"></div><div class="cb-dot-y"></div><div class="cb-dot-g"></div></div><div class="cb-lang">Lua</div></div>
+              <div class="cb-actions"><button class="cb-btn" onclick="copyRaw(this)"><i data-lucide="copy"></i>Copy Raw</button></div>
+            </div>
+            <div class="cb-wrap"><div class="cb-lines">
+              <div class="line-nums" id="ln-13"></div>
+<pre class="cb-pre" id="pre-13"><span class="key">Instructions</span> = {
   { <span class="key">Title</span> = <span class="str">"Open Junkie"</span>,     <span class="key">Body</span> = <span class="str">"Click Junkie Development to open your key link."</span> },
   { <span class="key">Title</span> = <span class="str">"Complete Steps"</span>,  <span class="key">Body</span> = <span class="str">"Finish all checkpoints on the Junkie page."</span> },
   { <span class="key">Title</span> = <span class="str">"Paste &amp; Redeem"</span>,  <span class="key">Body</span> = <span class="str">"Paste your jnk- key above and hit Redeem."</span> },
 }</pre>
+            </div></div>
           </div>
         </div></div>
       </div>
 
       
       <div class="page" data-idx="14">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="history"></i> Changelog Config</div>
-          <div class="page-title">Changelog Config</div>
-          <div class="page-desc">Controls the ★ changelog popup. Each version entry has its own tag colour and bullet notes.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="history"></i> Changelog Config</div><div class="page-title">Changelog Config</div><div class="page-desc">Controls the ★ changelog popup. Each version entry has its own tag colour and bullet notes.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="prop-table">
             <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Show</td><td class="ptype">boolean</td><td class="pdesc"><code>true</code> = shows the ★ changelog button.</td></tr>
-              <tr><td class="pname">Title</td><td class="ptype">string</td><td class="pdesc">Header text on the changelog page.</td></tr>
-              <tr><td class="pname">Versions</td><td class="ptype">array</td><td class="pdesc">Array of version entries — each has Version, Date, Tag, Notes.</td></tr>
+              <tr><td class="pname">Show</td><td><span class="ptype-pill ptype-bool">boolean</span></td><td class="pdesc"><code>true</code> = shows the ★ changelog button.</td></tr>
+              <tr><td class="pname">Title</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Header text on the changelog page.</td></tr>
+              <tr><td class="pname">Versions</td><td><span class="ptype-pill ptype-arr">array</span></td><td class="pdesc">Array of version entries — each has Version, Date, Tag, Notes.</td></tr>
             </tbody>
           </table>
           <div class="divider"></div>
           <table class="prop-table">
             <thead><tr><th>Entry Field</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td class="pname">Version</td><td class="ptype">string</td><td class="pdesc">Version pill label. e.g. <code>"1.2"</code></td></tr>
-              <tr><td class="pname">Date</td><td class="ptype">string</td><td class="pdesc">Optional date shown right-aligned. e.g. <code>"Feb 2026"</code></td></tr>
-              <tr><td class="pname">Tag</td><td class="ptype">string</td><td class="pdesc">One tag per version — controls pill colour. See Changelog Tags page.</td></tr>
-              <tr><td class="pname">Notes</td><td class="ptype">string[]</td><td class="pdesc">Each string becomes a bullet point.</td></tr>
+              <tr><td class="pname">Version</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Version pill label. e.g. <code>"1.2"</code></td></tr>
+              <tr><td class="pname">Date</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">Optional date shown right-aligned. e.g. <code>"Feb 2026"</code></td></tr>
+              <tr><td class="pname">Tag</td><td><span class="ptype-pill ptype-str">string</span></td><td class="pdesc">One tag per version — controls pill colour. See Changelog Tags page.</td></tr>
+              <tr><td class="pname">Notes</td><td><span class="ptype-pill ptype-arr">string[]</span></td><td class="pdesc">Each string becomes a bullet point.</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -1207,10 +879,7 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="15">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="tag"></i> 06 — Reference</div>
-          <div class="page-title">Changelog Tags</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="tag"></i> 06 — Reference</div><div class="page-title">Changelog Tags</div></div>
         <div class="page-scroll"><div class="doc-content">
           <table class="tags-table">
             <tbody>
@@ -1226,15 +895,18 @@ hub:<span class="fn">Init</span>()
 
       
       <div class="page" data-idx="16">
-        <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="code-2"></i> 07 — Example</div>
-          <div class="page-title">Full Config Example</div>
-          <div class="page-desc">A complete, working config you can copy and customise.</div>
-        </div>
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="code-2"></i> 07 — Example</div><div class="page-title">Full Config Example</div><div class="page-desc">A complete, working config you can copy and customise.</div></div>
         <div class="page-scroll"><div class="doc-content">
           <div class="codeblock">
-            <div class="cb-header"><div class="cb-lang"><div class="cb-dot"></div>Lua — Full Config</div><button class="copy-btn" onclick="copyCode(this)"><i data-lucide="copy"></i> Copy</button></div>
-<pre><span class="fn">getgenv</span>().<span class="key">LOAD</span> = <span class="bool">nil</span>
+            <div class="cb-header">
+              <div class="cb-left"><div class="cb-dots"><div class="cb-dot-r"></div><div class="cb-dot-y"></div><div class="cb-dot-g"></div></div><div class="cb-lang">Lua — Full Config</div></div>
+              <div class="cb-actions">
+                <button class="cb-btn" onclick="copyRaw(this)"><i data-lucide="copy"></i>Copy Raw</button>
+              </div>
+            </div>
+            <div class="cb-wrap"><div class="cb-lines">
+              <div class="line-nums" id="ln-16"></div>
+<pre class="cb-pre" id="pre-16"><span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> = <span class="bool">nil</span>
 
 <span class="kw">local</span> Junkie_Configs = {
   <span class="key">UseJunkie</span>       = <span class="bool">true</span>,
@@ -1249,35 +921,38 @@ hub:<span class="fn">Init</span>()
     { <span class="key">Name</span>=<span class="str">"Linkvertise"</span>, <span class="key">Url</span>=<span class="str">"https://linkvertise.com/yourhub"</span>, <span class="key">Show</span>=<span class="bool">true</span>, <span class="key">Pinned</span>=<span class="bool">false</span> },
   },
   <span class="key">GameSupport</span> = {
-    <span class="key">Universal</span> = { <span class="key">Name</span>=<span class="str">"Universal"</span>, <span class="key">Free</span>=<span class="str">"https://api.jnkie.com/.../HASH/download"</span> },
+    [<span class="num">2788229376</span>] = { <span class="key">Name</span>=<span class="str">"Blox Fruits"</span>, <span class="key">Free</span>=<span class="str">"..."</span>, <span class="key">Premium</span>=<span class="str">"..."</span> },
+    <span class="key">Universal</span>    = { <span class="key">Name</span>=<span class="str">"Universal"</span>,   <span class="key">Free</span>=<span class="str">"..."</span>, <span class="key">Premium</span>=<span class="str">"..."</span> },
   },
 }
 
 <span class="kw">local</span> UI_Configs = {
-  <span class="key">Name</span> = <span class="str">"My Hub"</span>,  <span class="key">Version</span> = <span class="str">"1.0"</span>,
+  <span class="key">Name</span> = <span class="str">"My Hub"</span>, <span class="key">Version</span> = <span class="str">"1.0"</span>,
   <span class="key">Color</span> = <span class="fn">Color3</span>.<span class="fn">fromRGB</span>(<span class="num">138</span>, <span class="num">43</span>, <span class="num">226</span>),
-  <span class="key">BadgeText</span> = <span class="str">"KEY SYSTEM"</span>,  <span class="key">ShowOutline</span> = <span class="bool">true</span>,
-  <span class="key">KeySystemLabel</span>      = <span class="str">"Enter Key"</span>,
+  <span class="key">GradientAnimated</span> = <span class="bool">true</span>, <span class="key">GradientAnimationSpeed</span> = <span class="num">4</span>,
+  <span class="key">BadgeText</span> = <span class="str">"KEY SYSTEM"</span>, <span class="key">ShowOutline</span> = <span class="bool">true</span>,
+  <span class="key">KeySystemLabel</span>       = <span class="str">"Enter Key"</span>,
   <span class="key">KeySystemPlaceholder</span> = <span class="str">"jnk-XXXXXXXXXXXXXXXX"</span>,
   <span class="key">ShowMemberCount</span> = <span class="bool">true</span>,
-  <span class="key">SnowEnabled</span> = <span class="bool">true</span>,  <span class="key">SnowDensity</span> = <span class="num">1.0</span>,
-  <span class="key">GlassOpacity</span> = <span class="num">0.18</span>,  <span class="key">SlideInEnabled</span> = <span class="bool">true</span>,
-  <span class="key">BlurEnabled</span> = <span class="bool">true</span>,  <span class="key">BlurSize</span> = <span class="num">30</span>,
-  <span class="key">CloseOnSuccess</span> = <span class="bool">true</span>,
-  <span class="key">SuccessMessage</span> = <span class="str">"✓ Access Granted!"</span>,
-  <span class="key">KeyFile</span>  = <span class="str">"myhub_key.txt"</span>,
-  <span class="key">Discord</span>  = <span class="str">"your_invite_code"</span>,
+  <span class="key">SnowEnabled</span> = <span class="bool">true</span>, <span class="key">SnowDensity</span> = <span class="num">1.0</span>,
+  <span class="key">GlassOpacity</span> = <span class="num">0.18</span>, <span class="key">SlideInEnabled</span> = <span class="bool">true</span>,
+  <span class="key">BlurEnabled</span> = <span class="bool">true</span>, <span class="key">BlurSize</span> = <span class="num">30</span>, <span class="key">OverlayOpacity</span> = <span class="num">0.65</span>,
+  <span class="key">CloseOnSuccess</span> = <span class="bool">true</span>, <span class="key">SuccessMessage</span> = <span class="str">"✓ Access Granted!"</span>,
+  <span class="key">KeyFile</span> = <span class="str">"myhub_key.txt"</span>, <span class="key">Discord</span> = <span class="str">"your_invite_code"</span>,
 }
 
-<span class="kw">local</span> system = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>))()
-<span class="kw">local</span> hub = system.<span class="fn">new</span>(Config)
-hub:<span class="fn">Init</span>()
-<span class="kw">while</span> <span class="kw">not</span> <span class="fn">getgenv</span>().<span class="key">LOAD</span> <span class="kw">do</span> task.<span class="fn">wait</span>(<span class="num">1</span>) <span class="kw">end</span>
-<span class="cm">-- YOUR SCRIPT STARTS HERE</span></pre>
-          </div>
-          <div class="callout info">
-            <div class="callout-icon"><i data-lucide="info"></i></div>
-            <div><strong>Note —</strong> Never modify the library itself. All customisation lives in your loader's Config table.</div>
+<span class="kw">local</span> Hub
+<span class="fn">pcall</span>(<span class="kw">function</span>()
+  <span class="kw">local</span> src = <span class="fn">game</span>:<span class="fn">HttpGet</span>(<span class="str">"LIBRARY_URL"</span>)
+  <span class="kw">if</span> #src &lt; <span class="num">100</span> <span class="kw">then return end</span>
+  Hub = <span class="fn">loadstring</span>(src)()
+<span class="kw">end</span>)
+<span class="kw">if</span> <span class="fn">type</span>(Hub) ~= <span class="str">"table"</span> <span class="kw">then return end</span>
+
+<span class="kw">while not</span> <span class="fn">getgenv</span>().<span class="key">SCRIPT_KEY</span> <span class="kw">do</span> task.<span class="fn">wait</span>(<span class="num">0.1</span>) <span class="kw">end</span>
+
+<span class="kw">return</span> Hub</pre>
+            </div></div>
           </div>
         </div></div>
       </div>
@@ -1285,25 +960,213 @@ hub:<span class="fn">Init</span>()
       
       <div class="page" data-idx="17">
         <div class="page-header">
-          <div class="page-eyebrow"><i data-lucide="image"></i> Media</div>
-          <div class="page-title">UI Showcase</div>
-          <div class="page-desc">Click the screenshot to expand. Hover for a 3D tilt effect.</div>
+          <div class="page-eyebrow"><i data-lucide="wand-2"></i> Tools</div>
+          <div class="page-title">Code Generator</div>
+          <div class="page-desc">Fill in the form and get a ready-to-use Lua config generated for you instantly.</div>
         </div>
         <div class="page-scroll"><div class="doc-content">
+          <div class="gen-wrapper">
+            <div id="gen-loading">
+              <div class="gen-loading-icon"><i data-lucide="cpu"></i></div>
+              <div class="gen-loading-title">Generating your config…</div>
+              <div class="gen-loading-msg" id="gen-loading-msg">Building your personalised Havoc Preset configuration</div>
+              <div class="gen-loading-bar-wrap"><div class="gen-loading-bar" id="gen-bar"></div></div>
+              <div class="gen-loading-steps">
+                <div class="gen-loading-step" id="gls-1"><i data-lucide="check"></i>Reading your settings</div>
+                <div class="gen-loading-step" id="gls-2"><i data-lucide="check"></i>Building Junkie_Configs</div>
+                <div class="gen-loading-step" id="gls-3"><i data-lucide="check"></i>Building UI_Configs</div>
+                <div class="gen-loading-step" id="gls-4"><i data-lucide="check"></i>Merging Config table</div>
+                <div class="gen-loading-step" id="gls-5"><i data-lucide="check"></i>Finalising output</div>
+              </div>
+            </div>
+
+            <div id="gen-result">
+              <div class="gen-result-header">
+                <i data-lucide="check-circle-2"></i>
+                <div><div class="gen-result-title">Config Generated!</div><div class="gen-result-sub">Your personalised Havoc Preset config is ready below.</div></div>
+              </div>
+              <div class="codeblock">
+                <div class="cb-header">
+                  <div class="cb-left"><div class="cb-dots"><div class="cb-dot-r"></div><div class="cb-dot-y"></div><div class="cb-dot-g"></div></div><div class="cb-lang">Lua — Your Config</div></div>
+                  <div class="cb-actions"><button class="cb-btn" onclick="copyGenerated(this)"><i data-lucide="copy"></i>Copy Code</button></div>
+                </div>
+                <div class="cb-wrap"><div class="cb-lines">
+                  <div class="line-nums" id="ln-gen"></div>
+                  <pre class="cb-pre" id="pre-gen" style="min-height:200px"></pre>
+                </div></div>
+              </div>
+              <button class="gen-reset" onclick="resetGenerator()"><i data-lucide="rotate-ccw"></i>Generate Another</button>
+              <div class="dl-btns">
+                <button class="dl-btn" onclick="downloadGenerated('lua')"><i data-lucide="download"></i>Download .lua</button>
+                <button class="dl-btn" onclick="downloadGenerated('txt')"><i data-lucide="file-text"></i>Download .txt</button>
+              </div>
+            </div>
+
+            <div id="gen-form">
+              <div class="gen-section-title"><i data-lucide="settings-2"></i>Junkie Settings</div>
+              <div class="gen-grid">
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="user"></i>Hub Name</label>
+                  <input class="gen-input" id="g-name" type="text" placeholder="My Hub" value="My Hub">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="hash"></i>Version</label>
+                  <input class="gen-input" id="g-ver" type="text" placeholder="1.0" value="1.0">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="server"></i>Junkie Service</label>
+                  <input class="gen-input" id="g-service" type="text" placeholder="My Hub">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="fingerprint"></i>Junkie Identifier</label>
+                  <input class="gen-input" id="g-ident" type="text" placeholder="1234">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="link"></i>Junkie Provider</label>
+                  <input class="gen-input" id="g-provider" type="text" placeholder="My Hub">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="webhook"></i>Webhook URL (optional)</label>
+                  <input class="gen-input" id="g-webhook" type="text" placeholder="https://jnkie.com/api/...">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="shield-alert"></i>Max Key Attempts</label>
+                  <input class="gen-input" id="g-attempts" type="number" value="5" min="1" max="20">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="key"></i>Key File Name</label>
+                  <input class="gen-input" id="g-keyfile" type="text" placeholder="myhub_key.txt" value="myhub_key.txt">
+                </div>
+              </div>
+
+              <div class="gen-section-title"><i data-lucide="palette"></i>Accent Colour</div>
+              <div class="color-section">
+                <div class="color-presets">
+                  <div class="color-swatch selected" style="background:#8b2be2" data-r="138" data-g="43" data-b="226" onclick="selectColor(this)" title="Purple"></div>
+                  <div class="color-swatch" style="background:#4ade80" data-r="74" data-g="222" data-b="128" onclick="selectColor(this)" title="Green"></div>
+                  <div class="color-swatch" style="background:#f43f5e" data-r="244" data-g="63" data-b="94" onclick="selectColor(this)" title="Rose"></div>
+                  <div class="color-swatch" style="background:#3b82f6" data-r="59" data-g="130" data-b="246" onclick="selectColor(this)" title="Blue"></div>
+                  <div class="color-swatch" style="background:#f59e0b" data-r="245" data-g="158" data-b="11" onclick="selectColor(this)" title="Amber"></div>
+                  <div class="color-swatch" style="background:#ec4899" data-r="236" data-g="72" data-b="153" onclick="selectColor(this)" title="Pink"></div>
+                  <div class="color-swatch" style="background:#06b6d4" data-r="6" data-g="182" data-b="212" onclick="selectColor(this)" title="Cyan"></div>
+                  <div class="color-swatch" style="background:#f97316" data-r="249" data-g="115" data-b="22" onclick="selectColor(this)" title="Orange"></div>
+                  <div class="color-swatch" style="background:#ffffff" data-r="255" data-g="255" data-b="255" onclick="selectColor(this)" title="White"></div>
+                  <div class="color-swatch" style="background:#ff0000" data-r="255" data-g="0" data-b="0" onclick="selectColor(this)" title="Red"></div>
+                  <div class="color-swatch" style="background:#00ffff" data-r="0" data-g="255" data-b="255" onclick="selectColor(this)" title="Aqua"></div>
+                  <div class="color-swatch" style="background:#ff00ff" data-r="255" data-g="0" data-b="255" onclick="selectColor(this)" title="Magenta"></div>
+                </div>
+                <div class="color-rgb-row">
+                  <span class="color-rgb-label">Custom RGB</span>
+                  <div class="color-rgb-inputs">
+                    <input class="color-rgb-input" id="g-r" type="number" min="0" max="255" value="138" placeholder="R" oninput="updateColorPreview()">
+                    <input class="color-rgb-input" id="g-g" type="number" min="0" max="255" value="43" placeholder="G" oninput="updateColorPreview()">
+                    <input class="color-rgb-input" id="g-b" type="number" min="0" max="255" value="226" placeholder="B" oninput="updateColorPreview()">
+                  </div>
+                  <div class="color-preview" id="color-preview" style="background:rgb(138,43,226)"></div>
+                </div>
+              </div>
+
+              <div class="gen-section-title"><i data-lucide="layout"></i>UI Options</div>
+              <div class="gen-grid">
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="badge"></i>Badge Text</label>
+                  <input class="gen-input" id="g-badge" type="text" placeholder="KEY SYSTEM" value="KEY SYSTEM">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="message-circle"></i>Discord Invite Code</label>
+                  <input class="gen-input" id="g-discord" type="text" placeholder="yourserver">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="key-square"></i>Key Label</label>
+                  <input class="gen-input" id="g-keylabel" type="text" placeholder="Enter Key" value="Enter Key">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="type"></i>Key Placeholder</label>
+                  <input class="gen-input" id="g-keyph" type="text" placeholder="jnk-XXXXXXXXXXXXXXXX" value="jnk-XXXXXXXXXXXXXXXX">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="check-circle-2"></i>Success Message</label>
+                  <input class="gen-input" id="g-success" type="text" placeholder="✓ Access Granted!" value="✓ Access Granted!">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="hash"></i>Gradient Speed (secs)</label>
+                  <input class="gen-input" id="g-gradspeed" type="number" value="4" min="1" max="30">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="eye"></i>Glass Opacity (0–1)</label>
+                  <input class="gen-input" id="g-glass" type="number" value="0.18" min="0" max="1" step="0.01">
+                </div>
+                <div class="gen-field">
+                  <label class="gen-label"><i data-lucide="sun-dim"></i>Blur Size (0–56)</label>
+                  <input class="gen-input" id="g-blur" type="number" value="30" min="0" max="56">
+                </div>
+              </div>
+
+              <div class="gen-section-title"><i data-lucide="toggle-left"></i>Feature Toggles</div>
+              <div class="gen-grid">
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-snow" checked><div class="toggle-slider"></div></label><span class="toggle-label">Snow Enabled</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-gradient" checked><div class="toggle-slider"></div></label><span class="toggle-label">Gradient Animated</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-outline" checked><div class="toggle-slider"></div></label><span class="toggle-label">Show Outline</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-slidein" checked><div class="toggle-slider"></div></label><span class="toggle-label">Slide-In Animation</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-bluren" checked><div class="toggle-slider"></div></label><span class="toggle-label">Blur Enabled</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-members" checked><div class="toggle-slider"></div></label><span class="toggle-label">Show Member Count</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-close" checked><div class="toggle-slider"></div></label><span class="toggle-label">Close on Success</span></div></div>
+                <div class="gen-field"><div class="toggle-row"><label class="toggle"><input type="checkbox" id="g-premium"><div class="toggle-slider"></div></label><span class="toggle-label">Premium Mode</span></div></div>
+              </div>
+
+              
+              <div class="gen-section-title"><i data-lucide="link-2"></i>Providers Editor</div>
+              <div style="font-size:11px;color:var(--fg3);font-family:var(--mono);margin-bottom:8px">Drag to reorder · Toggle show/pin · Only ONE IsJunkie provider allowed</div>
+              <div id="providers-editor"></div>
+              <button type="button" class="add-row-btn" onclick="addProvider()"><i data-lucide="plus"></i>Add Provider</button>
+
+              
+              <div class="gen-section-title"><i data-lucide="gamepad-2"></i>Game Support</div>
+              <div id="game-entries-list" style="margin-bottom:8px"></div>
+              <button type="button" class="add-row-btn" onclick="addGameEntryManual()" style="margin-bottom:16px"><i data-lucide="plus"></i>Add Game Manually</button>
+
+              
+              <div class="gen-section-title"><i data-lucide="share-2"></i>Socials</div>
+              <div style="font-size:11px;color:var(--fg3);font-family:var(--mono);margin-bottom:8px">Drag to reorder · Toggle show/pin</div>
+              <div id="socials-editor"></div>
+              <button type="button" class="add-row-btn" onclick="addSocial()"><i data-lucide="plus"></i>Add Social</button>
+
+              
+              <div class="gen-section-title" style="margin-top:20px"><i data-lucide="external-link"></i>App Links</div>
+              <div style="font-size:11px;color:var(--fg3);font-family:var(--mono);margin-bottom:8px">Drag to reorder · Icon IDs are fixed by the library</div>
+              <div id="applinks-editor"></div>
+              <button type="button" class="add-row-btn" onclick="addAppLink()"><i data-lucide="plus"></i>Add App Link</button>
+
+              
+              <div class="gen-section-title" style="margin-top:20px"><i data-lucide="list-ordered"></i>Instructions Editor</div>
+              <div id="instr-editor"></div>
+              <button type="button" class="add-row-btn" onclick="addInstrRow()"><i data-lucide="plus"></i>Add Step</button>
+
+              
+              <div class="gen-section-title" style="margin-top:20px"><i data-lucide="history"></i>Changelog Editor</div>
+              <div id="cl-editor"></div>
+              <button type="button" class="add-row-btn" onclick="addClVersion()"><i data-lucide="plus"></i>Add Version</button>
+
+              <button class="gen-submit" style="margin-top:24px" onclick="generateCode()">
+                <i data-lucide="wand-2"></i>Generate My Config
+              </button>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      
+      <div class="page" data-idx="18">
+        <div class="page-header"><div class="page-eyebrow"><i data-lucide="image"></i> Media</div><div class="page-title">UI Showcase</div><div class="page-desc">Click the screenshot to expand.</div></div>
+        <div class="page-scroll"><div class="doc-content">
           <div class="img-showcase" id="img3d" onclick="openLightbox()">
-            <img id="showcase-img"
-              src="https://raw.githubusercontent.com/1NFERNO-HUB/Junkie/refs/heads/main/Screenshot_20260223_154320_Roblox.jpg"
-              alt="Havoc Preset UI in Roblox"
-              onerror="this.parentElement.innerHTML='<div style=\'height:220px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg3);font-family:var(--mono);font-size:11px;letter-spacing:1px;border:1px dashed var(--border2);border-radius:var(--radius);\'>[screenshot unavailable]</div>'"
-            />
-            <div class="img-overlay"></div>
+            <img id="showcase-img" src="https://raw.githubusercontent.com/1NFERNO-HUB/Junkie/refs/heads/main/Screenshot_20260223_154320_Roblox.jpg" alt="Havoc Preset UI in Roblox" onerror="this.parentElement.innerHTML='<div style=\'height:220px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg3);font-family:var(--mono);font-size:11px;\'>[screenshot unavailable]</div>'"/>
             <div class="img-hint"><i data-lucide="zoom-in"></i> Click to expand</div>
           </div>
-
-          <div style="margin-top:28px;">
+          <div style="margin-top:24px">
             <h3><i data-lucide="play-circle"></i> Video Preview</h3>
-            <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:10px;">
-              <video controls preload="metadata" style="width:100%;display:block;background:#000;">
+            <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:10px">
+              <video controls preload="metadata" style="width:100%;display:block;background:#000">
                 <source src="https://github.com/1NFERNO-HUB/Junkie/raw/refs/heads/main/XRecorder_20260223_02.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
@@ -1312,55 +1175,76 @@ hub:<span class="fn">Init</span>()
         </div></div>
       </div>
 
-      
       <div id="page-nav">
-        <button class="pnav-btn" id="prev-btn" onclick="goTo(currentPage-1)">
-          <i data-lucide="arrow-left"></i> Prev
-        </button>
+        <button class="pnav-btn" id="prev-btn" onclick="goTo(currentPage-1)"><i data-lucide="arrow-left"></i>Prev</button>
         <div class="pnav-center">
           <div class="pnav-dots" id="dots"></div>
           <div class="pnav-label" id="pnav-label"></div>
         </div>
-        <button class="pnav-btn" id="next-btn" onclick="goTo(currentPage+1)">
-          Next <i data-lucide="arrow-right"></i>
-        </button>
+        <button class="pnav-btn" id="next-btn" onclick="goTo(currentPage+1)">Next<i data-lucide="arrow-right"></i></button>
       </div>
-
     </div>
   </div>
 </div>
 
 <div id="lightbox" onclick="lbBg(event)">
   <button id="lb-close" onclick="closeLightbox()"><i data-lucide="x"></i></button>
-  <img id="lb-img"
-    src="https://raw.githubusercontent.com/1NFERNO-HUB/Junkie/refs/heads/main/Screenshot_20260223_154320_Roblox.jpg"
-    alt="UI Preview"
-  />
+  <img id="lb-img" src="https://raw.githubusercontent.com/1NFERNO-HUB/Junkie/refs/heads/main/Screenshot_20260223_154320_Roblox.jpg" alt="UI Preview"/>
 </div>
 
-<div id="toast" style="
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
-  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);
-  padding:10px 18px;font-size:13px;color:var(--fg);
-  display:flex;align-items:center;gap:8px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  transition:transform 0.3s var(--spring),opacity 0.3s ease;
-  opacity:0;pointer-events:none;z-index:1000;white-space:nowrap;
-">
-  <i data-lucide="check-circle-2" style="width:14px;height:14px;color:var(--green);flex-shrink:0;"></i>
-  <span id="toast-msg">Copied to clipboard</span>
-</div>
+<div id="toast"><i data-lucide="check-circle-2"></i><span id="toast-msg">Copied!</span></div>
 
 <script>
+window.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  initLineNums();
+  renderProvidersEditor();
+  renderSocialsEditor();
+  renderAppLinksEditor();
+  renderInstrEditor();
+  renderClEditor();
+  renderGameEntries();
+});
 
-window.addEventListener('DOMContentLoaded', () => lucide.createIcons());
-
-const TOTAL = 18;
+const TOTAL = 19;
 const NAMES = ['Overview','How It Works','Minimal Template','Junkie Configs','Providers','GameSupport',
   'UI Configs','General','Background','Snow','Key System','Discord','Socials',
-  'Instructions','Changelog Config','Changelog Tags','Full Example','UI Showcase'];
-let current = 0;
-let sbOpen = true;
+  'Instructions','Changelog Config','Changelog Tags','Full Example','Code Generator','UI Showcase'];
+let currentPage = 0, sbOpen = true;
+
+function initLineNums() {
+  document.querySelectorAll('.cb-pre').forEach(pre => {
+    const id = pre.id;
+    const lnEl = document.getElementById('ln-' + id.replace('pre-',''));
+    if (!lnEl) return;
+    const lines = pre.innerText.split('\n').length;
+    lnEl.innerHTML = Array.from({length: lines}, (_,i) => `<span>${i+1}</span>`).join('');
+  });
+}
+
+const typedBlocks = new Set();
+function typewriteBlock(pre) {
+  if (typedBlocks.has(pre.id)) return;
+  typedBlocks.add(pre.id);
+  const html = pre.innerHTML;
+  const text = pre.innerText;
+  pre.innerHTML = '';
+  const inner = document.createElement('span');
+  pre.appendChild(inner);
+  const cursor = document.createElement('span');
+  cursor.className = 'cb-cursor';
+  pre.appendChild(cursor);
+  const chars = Array.from(text);
+  let i = 0;
+  const speed = Math.max(8, Math.min(22, 1800 / chars.length));
+  function tick() {
+    if (i >= chars.length) { pre.innerHTML = html; initLineNums(); return; }
+    const chunk = Math.ceil(1 + chars.length / 400);
+    for (let c = 0; c < chunk && i < chars.length; c++, i++) inner.textContent += chars[i];
+    setTimeout(tick, speed);
+  }
+  tick();
+}
 
 function buildDots() {
   const c = document.getElementById('dots');
@@ -1368,27 +1252,31 @@ function buildDots() {
   c.innerHTML = '';
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');
-    d.className = 'pnav-dot' + (i === current ? ' active' : '');
+    d.className = 'pnav-dot' + (i === currentPage ? ' active' : '');
     d.title = NAMES[i];
-    (i => d.onclick = () => goTo(i))(i);
+    (idx => d.onclick = () => goTo(idx))(i);
     c.appendChild(d);
   }
   const lbl = document.getElementById('pnav-label');
-  if (lbl) lbl.textContent = NAMES[current] + ' — ' + (current+1) + ' / ' + TOTAL;
+  if (lbl) lbl.textContent = NAMES[currentPage] + ' — ' + (currentPage+1) + ' / ' + TOTAL;
   const bc = document.getElementById('breadcrumb');
-  if (bc) bc.textContent = NAMES[current];
+  if (bc) bc.textContent = NAMES[currentPage];
 }
 
 function goTo(idx) {
   if (idx < 0 || idx >= TOTAL) return;
   const old = document.querySelector('.page.active');
   if (old) old.classList.remove('active');
-  current = idx;
+  currentPage = idx;
   const next = document.querySelector('.page[data-idx="'+idx+'"]');
   if (next) {
     next.classList.add('active');
     const s = next.querySelector('.page-scroll');
     if (s) s.scrollTop = 0;
+    setTimeout(() => {
+      const pre = next.querySelector('.cb-pre');
+      if (pre && !typedBlocks.has(pre.id)) typewriteBlock(pre);
+    }, 80);
   }
   document.querySelectorAll('.nav-btn[data-idx]').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.idx) === idx);
@@ -1405,8 +1293,7 @@ function goTo(idx) {
 function toggleSidebar() {
   sbOpen = !sbOpen;
   document.getElementById('sidebar').classList.toggle('hidden', !sbOpen);
-  if (window.innerWidth <= 800)
-    document.getElementById('sb-overlay').classList.toggle('visible', sbOpen);
+  if (window.innerWidth <= 800) document.getElementById('sb-overlay').classList.toggle('visible', sbOpen);
 }
 function closeSbMobile() {
   if (window.innerWidth <= 800) {
@@ -1415,26 +1302,21 @@ function closeSbMobile() {
     document.getElementById('sb-overlay').classList.remove('visible');
   }
 }
-
 function filterTabs(val) {
   const q = val.toLowerCase().trim();
   document.querySelectorAll('.nav-btn[data-label]').forEach(b => {
     b.classList.toggle('search-hidden', q.length > 0 && !b.dataset.label.toLowerCase().includes(q));
   });
 }
-
 function enterApp() {
   document.getElementById('home').classList.add('out');
-  const app = document.getElementById('app');
-  app.classList.add('visible');
+  document.getElementById('app').classList.add('visible');
   setTimeout(() => { buildDots(); goTo(0); }, 60);
 }
-
 document.addEventListener('keydown', e => {
-  const homeOut = document.getElementById('home').classList.contains('out');
-  if (homeOut) {
-    if (e.key === 'ArrowRight') goTo(current + 1);
-    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  if (document.getElementById('home').classList.contains('out')) {
+    if (e.key === 'ArrowRight') goTo(currentPage + 1);
+    if (e.key === 'ArrowLeft')  goTo(currentPage - 1);
   }
   if (e.key === 'Escape') closeLightbox();
 });
@@ -1443,30 +1325,31 @@ let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
-  lucide.createIcons();
   t.style.transform = 'translateX(-50%) translateY(0)';
   t.style.opacity = '1';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    t.style.transform = 'translateX(-50%) translateY(60px)';
-    t.style.opacity = '0';
-  }, 2200);
+  toastTimer = setTimeout(() => { t.style.transform='translateX(-50%) translateY(60px)'; t.style.opacity='0'; }, 2200);
 }
 
-function copyCode(btn) {
-  const pre = btn.closest('.codeblock').querySelector('pre');
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    btn.innerHTML = '<i data-lucide="check"></i> Copied';
-    btn.style.color = 'var(--green)';
-    btn.style.borderColor = 'rgba(74,222,128,0.3)';
+function getRawText(btn) {
+  const pre = btn.closest('.codeblock').querySelector('.cb-pre');
+  return pre ? pre.innerText : '';
+}
+function copyRaw(btn) {
+  navigator.clipboard.writeText(getRawText(btn)).then(() => {
+    btn.innerHTML = '<i data-lucide="check"></i>Copied!';
     lucide.createIcons();
-    showToast('Copied to clipboard');
-    setTimeout(() => {
-      btn.innerHTML = '<i data-lucide="copy"></i> Copy';
-      btn.style.color = '';
-      btn.style.borderColor = '';
-      lucide.createIcons();
-    }, 2000);
+    showToast('Copied raw code');
+    setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>Copy Raw'; lucide.createIcons(); }, 2000);
+  });
+}
+function copyGenerated(btn) {
+  const pre = document.getElementById('pre-gen');
+  navigator.clipboard.writeText(pre ? pre.innerText : '').then(() => {
+    btn.innerHTML = '<i data-lucide="check"></i>Copied!';
+    lucide.createIcons();
+    showToast('Config copied to clipboard!');
+    setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>Copy Code'; lucide.createIcons(); }, 2000);
   });
 }
 
@@ -1477,30 +1360,565 @@ if (img3d) {
     const x = (e.clientX - r.left) / r.width - 0.5;
     const y = (e.clientY - r.top) / r.height - 0.5;
     const img = img3d.querySelector('img');
-    if (img) img.style.transform = 'perspective(700px) rotateY('+x*12+'deg) rotateX('+(-y*8)+'deg) scale(1.025)';
+    if (img) img.style.transform = `perspective(700px) rotateY(${x*12}deg) rotateX(${-y*8}deg) scale(1.025)`;
   });
   img3d.addEventListener('mouseleave', () => {
     const img = img3d.querySelector('img');
-    if (img) { img.style.transition = 'transform 0.4s var(--spring)'; img.style.transform = ''; setTimeout(() => { if(img) img.style.transition = 'transform 0.08s ease'; }, 400); }
+    if (img) { img.style.transition='transform 0.4s var(--spring)'; img.style.transform=''; setTimeout(() => { if(img) img.style.transition='transform 0.08s ease'; }, 400); }
   });
 }
-
 function openLightbox() { document.getElementById('lightbox').classList.add('open'); }
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-function lbBg(e) { if (e.target === document.getElementById('lightbox')) closeLightbox(); }
+function lbBg(e) { if (e.target===document.getElementById('lightbox')) closeLightbox(); }
 const lbImg = document.getElementById('lb-img');
 if (lbImg) {
   lbImg.addEventListener('mousemove', e => {
     const r = lbImg.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width - 0.5;
     const y = (e.clientY - r.top) / r.height - 0.5;
-    lbImg.style.transform = 'perspective(1000px) rotateY('+x*8+'deg) rotateX('+(-y*5)+'deg)';
+    lbImg.style.transform = `perspective(1000px) rotateY(${x*8}deg) rotateX(${-y*5}deg)`;
   });
-  lbImg.addEventListener('mouseleave', () => {
-    lbImg.style.transition = 'transform 0.4s var(--spring)';
-    lbImg.style.transform = '';
-    setTimeout(() => lbImg.style.transition = 'transform 0.08s ease', 400);
+  lbImg.addEventListener('mouseleave', () => { lbImg.style.transition='transform 0.4s var(--spring)'; lbImg.style.transform=''; setTimeout(() => lbImg.style.transition='transform 0.08s ease', 400); });
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('g-r').value = el.dataset.r;
+  document.getElementById('g-g').value = el.dataset.g;
+  document.getElementById('g-b').value = el.dataset.b;
+  updateColorPreview();
+}
+function updateColorPreview() {
+  const r = parseInt(document.getElementById('g-r').value)||0;
+  const g = parseInt(document.getElementById('g-g').value)||0;
+  const b = parseInt(document.getElementById('g-b').value)||0;
+  document.getElementById('color-preview').style.background = `rgb(${r},${g},${b})`;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+}
+
+function v(id) { return document.getElementById(id)?.value || ''; }
+function chk(id) { return document.getElementById(id)?.checked; }
+
+function makeDraggable(containerEl, dataArr, renderFn) {
+  let dragIdx = null;
+  containerEl.addEventListener('dragstart', e => {
+    const row = e.target.closest('[draggable]');
+    if (!row) return;
+    dragIdx = parseInt(row.dataset.idx);
+    row.classList.add('dragging');
   });
+  containerEl.addEventListener('dragend', e => {
+    containerEl.querySelectorAll('[draggable]').forEach(r => r.classList.remove('dragging','drag-over'));
+    dragIdx = null;
+  });
+  containerEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    const row = e.target.closest('[draggable]');
+    containerEl.querySelectorAll('[draggable]').forEach(r => r.classList.remove('drag-over'));
+    if (row) row.classList.add('drag-over');
+  });
+  containerEl.addEventListener('drop', e => {
+    e.preventDefault();
+    const row = e.target.closest('[draggable]');
+    if (!row || dragIdx === null) return;
+    const dropIdx = parseInt(row.dataset.idx);
+    if (dragIdx === dropIdx) return;
+    const moved = dataArr.splice(dragIdx, 1)[0];
+    dataArr.splice(dropIdx, 0, moved);
+    renderFn();
+  });
+}
+
+let providersData = [
+  { name: 'Junkie Development', url: 'https://jnkie.com/junkiehub', show: true, isJunkie: true, pinned: true },
+  { name: 'Linkvertise', url: '', show: true, isJunkie: false, pinned: false },
+];
+
+function renderProvidersEditor() {
+  const el = document.getElementById('providers-editor');
+  el.innerHTML = providersData.map((p, i) => `
+    <div class="provider-row" draggable="true" data-idx="${i}">
+      <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+        <input class="gen-input" style="padding:7px 9px;font-size:13px" type="text" placeholder="Provider name" value="${esc(p.name)}" oninput="providersData[${i}].name=this.value">
+        <input class="gen-input" style="padding:7px 9px;font-family:var(--mono);font-size:11px" type="text" placeholder="URL" value="${esc(p.url)}" oninput="providersData[${i}].url=this.value">
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex-shrink:0">
+        <div class="toggle-row" title="Show">
+          <label class="toggle"><input type="checkbox" ${p.show?'checked':''} onchange="providersData[${i}].show=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Show</span>
+        </div>
+        <div class="toggle-row" title="Pin first">
+          <label class="toggle"><input type="checkbox" ${p.pinned?'checked':''} onchange="providersData[${i}].pinned=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Pin</span>
+        </div>
+        <div class="toggle-row" title="IsJunkie SDK provider">
+          <label class="toggle"><input type="checkbox" ${p.isJunkie?'checked':''} onchange="setJunkieProvider(${i},this.checked)"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px;color:var(--green)">Junkie</span>
+        </div>
+        <button class="cl-del-btn" onclick="removeProvider(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+  makeDraggable(el, providersData, renderProvidersEditor);
+}
+
+function setJunkieProvider(idx, val) {
+  if (val) providersData.forEach((p,i) => p.isJunkie = i === idx);
+  else providersData[idx].isJunkie = false;
+  renderProvidersEditor();
+}
+function addProvider() {
+  providersData.push({ name: '', url: '', show: true, isJunkie: false, pinned: false });
+  renderProvidersEditor();
+}
+function removeProvider(idx) {
+  providersData.splice(idx, 1);
+  renderProvidersEditor();
+}
+
+let gameSearchTimer = null;
+let gameEntries = [];
+
+function addGameEntry(id, name) {
+  if (gameEntries.find(g => String(g.id) === String(id))) { showToast('Game already added'); return; }
+  gameEntries.push({ id, name, free: '', premium: '' });
+  renderGameEntries();
+}
+function addGameEntryManual() {
+  gameEntries.push({ id: '', name: '', free: '', premium: '' });
+  renderGameEntries();
+}
+function removeGameEntry(idx) { gameEntries.splice(idx, 1); renderGameEntries(); }
+
+function renderGameEntries() {
+  const el = document.getElementById('game-entries-list');
+  if (!gameEntries.length) { el.innerHTML = '<div style="font-size:11px;color:var(--fg3);font-family:var(--mono);padding:8px 0">No game entries yet. Add one manually.</div>'; lucide.createIcons(); return; }
+  el.innerHTML = gameEntries.map((g,i) => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--green)">GAME ${i+1}${g.name ? ' — '+g.name : ''}</div>
+        <button class="cl-del-btn" onclick="removeGameEntry(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:8px">
+        <div class="gen-field">
+          <label class="gen-label" style="font-size:11px">Place ID</label>
+          <input class="gen-input" style="padding:6px 9px;font-family:var(--mono);font-size:13px" value="${g.id}" placeholder="2788229376" oninput="gameEntries[${i}].id=this.value">
+        </div>
+        <div class="gen-field">
+          <label class="gen-label" style="font-size:11px">Game Name</label>
+          <input class="gen-input" style="padding:6px 9px;font-size:13px" value="${esc(g.name)}" placeholder="Blox Fruits" oninput="gameEntries[${i}].name=this.value">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+        <div class="gen-field">
+          <label class="gen-label" style="font-size:11px">Free Script URL</label>
+          <input class="gen-input" style="padding:6px 9px;font-family:var(--mono);font-size:11px" value="${esc(g.free)}" placeholder="https://api.jnkie.com/.../HASH/download" oninput="gameEntries[${i}].free=this.value">
+        </div>
+        <div class="gen-field">
+          <label class="gen-label" style="font-size:11px">Premium Script URL</label>
+          <input class="gen-input" style="padding:6px 9px;font-family:var(--mono);font-size:11px" value="${esc(g.premium)}" placeholder="https://api.jnkie.com/.../HASH/download" oninput="gameEntries[${i}].premium=this.value">
+        </div>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+const SOCIAL_ICONS = {
+  Discord:'message-circle', GitHub:'github', Website:'globe', Twitter:'twitter',
+  YouTube:'youtube', TikTok:'music', Instagram:'camera', Telegram:'send',
+  Reddit:'message-square', Twitch:'tv', Patreon:'heart', 'Ko-fi':'coffee',
+};
+
+let socialsData = [
+  { name:'Discord', assetId:'124569550333033', show:true, pinned:true, link:'' },
+  { name:'GitHub',  assetId:'82005505285811',  show:true, pinned:false, link:'' },
+  { name:'Website', assetId:'70402301072503',  show:true, pinned:false, link:'' },
+];
+
+function renderSocialsEditor() {
+  const el = document.getElementById('socials-editor');
+  el.innerHTML = socialsData.map((s,i) => `
+    <div class="editor-row" draggable="true" data-idx="${i}" style="flex-wrap:wrap">
+      <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+      <div class="editor-row-icon"><i data-lucide="${SOCIAL_ICONS[s.name]||'link'}"></i></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <input class="gen-input" style="padding:7px 9px;font-size:13px" type="text" placeholder="Name" value="${esc(s.name)}" oninput="socialsData[${i}].name=this.value;renderSocialsEditor()">
+        <input class="gen-input" style="padding:7px 9px;font-family:var(--mono);font-size:11px" type="text" placeholder="https://…" value="${esc(s.link)}" oninput="socialsData[${i}].link=this.value">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-start">
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" ${s.show?'checked':''} onchange="socialsData[${i}].show=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Show</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" ${s.pinned?'checked':''} onchange="socialsData[${i}].pinned=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Pin</span>
+        </div>
+        <button class="cl-del-btn" onclick="removeSocial(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+  makeDraggable(el, socialsData, renderSocialsEditor);
+}
+function addSocial() {
+  socialsData.push({ name:'', assetId:'0', show:true, pinned:false, link:'' });
+  renderSocialsEditor();
+}
+function removeSocial(idx) { socialsData.splice(idx,1); renderSocialsEditor(); }
+
+const APPLINK_ICONS = {
+  'Linkvertise': '136932438761448',
+  'LootLabs':    '112948200285735',
+  'Work.ink':    '92786469847385',
+  'Shrtfly':     '0',
+  'Lockr':       '0',
+  'Website':     '70402301072503',
+};
+
+let appLinksData = [
+  { name:'', show:true, pinned:true, link:'' },
+];
+
+function getAppIcon(name) {
+  return APPLINK_ICONS[name] || '0';
+}
+
+function renderAppLinksEditor() {
+  const el = document.getElementById('applinks-editor');
+  el.innerHTML = appLinksData.map((a,i) => `
+    <div class="editor-row" draggable="true" data-idx="${i}" style="flex-wrap:wrap">
+      <div class="drag-handle"><i data-lucide="grip-vertical"></i></div>
+      <div class="editor-row-icon"><i data-lucide="external-link"></i></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <input class="gen-input" style="padding:7px 9px;font-size:13px" type="text" placeholder="App name" value="${esc(a.name)}" oninput="appLinksData[${i}].name=this.value">
+        <input class="gen-input" style="padding:7px 9px;font-family:var(--mono);font-size:11px" type="text" placeholder="https://…" value="${esc(a.link)}" oninput="appLinksData[${i}].link=this.value">
+        <div class="applink-locked" title="Icon ID is auto-assigned by the library">🔒 icon: auto</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-start">
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" ${a.show?'checked':''} onchange="appLinksData[${i}].show=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Show</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" ${a.pinned?'checked':''} onchange="appLinksData[${i}].pinned=this.checked"><div class="toggle-slider"></div></label>
+          <span class="toggle-label" style="font-size:11px">Pin</span>
+        </div>
+        <button class="cl-del-btn" onclick="removeAppLink(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+  makeDraggable(el, appLinksData, renderAppLinksEditor);
+}
+function addAppLink() {
+  appLinksData.push({ name:'', show:true, pinned:false, link:'' });
+  renderAppLinksEditor();
+}
+function removeAppLink(idx) { appLinksData.splice(idx,1); renderAppLinksEditor(); }
+
+let instrRows = [
+  { title:'Open Junkie',    body:'Click Junkie Development to open your key link.' },
+  { title:'Complete Steps', body:'Finish all checkpoints on the Junkie page.' },
+  { title:'Paste & Redeem',body:'Paste your jnk- key above and hit Redeem.' },
+];
+
+function renderInstrEditor() {
+  const el = document.getElementById('instr-editor');
+  el.innerHTML = instrRows.map((r,i) => `
+    <div class="instr-row">
+      <div class="instr-row-num">${i+1}</div>
+      <div class="instr-fields">
+        <input class="instr-title-input" type="text" placeholder="Step title" value="${esc(r.title)}" oninput="instrRows[${i}].title=this.value">
+        <textarea class="instr-body-input" placeholder="Step description…" oninput="instrRows[${i}].body=this.value">${r.body}</textarea>
+      </div>
+      <button class="instr-del-btn" onclick="removeInstrRow(${i})"><i data-lucide="trash-2"></i></button>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+function addInstrRow() { instrRows.push({ title:'', body:'' }); renderInstrEditor(); }
+function removeInstrRow(idx) { instrRows.splice(idx,1); renderInstrEditor(); }
+
+let clVersions = [
+  { version:'1.0', date:'', tag:'NEW', notes:['Initial release'] }
+];
+const CL_TAGS = ['NEW','FIX','IMPROVED','REMOVED','SECURITY'];
+
+function renderClEditor() {
+  const el = document.getElementById('cl-editor');
+  el.innerHTML = clVersions.map((cv,vi) => `
+    <div class="cl-version-row">
+      <div class="cl-version-header">
+        <select class="cl-version-tag-select" onchange="clVersions[${vi}].tag=this.value" style="color:${tagColor(cv.tag)}">
+          ${CL_TAGS.map(t=>`<option value="${t}" ${cv.tag===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <div class="cl-version-fields">
+          <input class="cl-version-input" type="text" placeholder="e.g. 1.0" value="${esc(cv.version)}" style="width:90px" oninput="clVersions[${vi}].version=this.value">
+          <input class="cl-version-input" type="text" placeholder="e.g. Feb 2026" value="${esc(cv.date)}" style="width:110px" oninput="clVersions[${vi}].date=this.value">
+        </div>
+        <button class="cl-del-btn" onclick="removeClVersion(${vi})"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div class="cl-notes-wrap">
+        ${cv.notes.map((n,ni) => `
+          <div class="cl-note-row">
+            <input class="cl-note-input" type="text" placeholder="Change note…" value="${esc(n)}" oninput="clVersions[${vi}].notes[${ni}]=this.value">
+            <button class="cl-note-del" onclick="removeClNote(${vi},${ni})"><i data-lucide="x"></i></button>
+          </div>
+        `).join('')}
+        <button type="button" class="add-row-btn" onclick="addClNote(${vi})" style="margin-top:4px"><i data-lucide="plus"></i>Add Note</button>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+function tagColor(tag) {
+  const map = { NEW:'#4ade80',FIX:'#f87171',IMPROVED:'#93c5fd',REMOVED:'#fdba74',SECURITY:'#fcd34d' };
+  return map[tag] || '#deeede';
+}
+function addClVersion() { clVersions.unshift({ version:'', date:'', tag:'NEW', notes:[''] }); renderClEditor(); }
+function removeClVersion(vi) { clVersions.splice(vi,1); renderClEditor(); }
+function addClNote(vi) { clVersions[vi].notes.push(''); renderClEditor(); }
+function removeClNote(vi,ni) { clVersions[vi].notes.splice(ni,1); renderClEditor(); }
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function q(s) { return s.replace(/\\/g,'\\\\').replace(/"/g,'\\"'); }
+
+function generateCode() {
+  const form = document.getElementById('gen-form');
+  const loading = document.getElementById('gen-loading');
+  const result = document.getElementById('gen-result');
+  form.style.display = 'none';
+  result.classList.remove('visible');
+  loading.classList.add('visible');
+
+  const actualDur = (Math.random() * 2 + 1.5);
+  document.getElementById('gen-bar').style.animation = 'none';
+  void document.getElementById('gen-bar').offsetWidth;
+  document.getElementById('gen-bar').style.setProperty('--load-dur', actualDur+'s');
+  document.getElementById('gen-bar').style.animation = `loadingBar ${actualDur}s ease-in-out forwards`;
+
+  const msgs = [`Building config for "${v('g-name')}"…`,'Applying colour theme…','Setting up Junkie SDK…','Preparing key system…','Wrapping up…'];
+  const steps = ['gls-1','gls-2','gls-3','gls-4','gls-5'];
+  const stepInterval = (actualDur * 1000) / steps.length;
+  steps.forEach((id,i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('visible');
+      document.getElementById('gen-loading-msg').textContent = msgs[i]||msgs[msgs.length-1];
+      if (i > 0) document.getElementById(steps[i-1])?.classList.add('done');
+      lucide.createIcons();
+    }, i * stepInterval);
+  });
+
+  setTimeout(() => {
+    document.getElementById(steps[steps.length-1])?.classList.add('done');
+    lucide.createIcons();
+  }, (steps.length - 0.2) * stepInterval);
+
+  setTimeout(() => {
+    loading.classList.remove('visible');
+    steps.forEach(id => { const el=document.getElementById(id); if(el){el.classList.remove('visible','done');} });
+    buildOutput();
+    result.classList.add('visible');
+    lucide.createIcons();
+    setTimeout(() => {
+      const pre = document.getElementById('pre-gen');
+      if (pre) { typedBlocks.delete('pre-gen'); typewriteBlock(pre); }
+    }, 200);
+  }, actualDur * 1000 + 300);
+}
+
+function buildOutput() {
+  const name       = v('g-name')     || 'My Hub';
+  const ver        = v('g-ver')      || '1.0';
+  const service    = v('g-service')  || name;
+  const ident      = v('g-ident')    || '1234';
+  const provider   = v('g-provider') || name;
+  const webhook    = v('g-webhook')  || '';
+  const attempts   = v('g-attempts') || '5';
+  const keyfile    = v('g-keyfile')  || 'myhub_key.txt';
+  const badge      = v('g-badge')    || 'KEY SYSTEM';
+  const discord    = v('g-discord')  || '';
+  const keylabel   = v('g-keylabel') || 'Enter Key';
+  const keyph      = v('g-keyph')    || 'jnk-XXXXXXXXXXXXXXXX';
+  const success    = v('g-success')  || '✓ Access Granted!';
+  const gradspeed  = v('g-gradspeed')|| '4';
+  const glass      = v('g-glass')    || '0.18';
+  const blur       = v('g-blur')     || '30';
+  const r = parseInt(v('g-r'))||138, g = parseInt(v('g-g'))||43, b = parseInt(v('g-b'))||226;
+  const snow     = chk('g-snow')     ? 'true':'false';
+  const gradient = chk('g-gradient') ? 'true':'false';
+  const outline  = chk('g-outline')  ? 'true':'false';
+  const slidein  = chk('g-slidein')  ? 'true':'false';
+  const bluren   = chk('g-bluren')   ? 'true':'false';
+  const members  = chk('g-members')  ? 'true':'false';
+  const closeok  = chk('g-close')    ? 'true':'false';
+  const premium  = chk('g-premium')  ? 'true':'false';
+
+  const providersStr = providersData.map(p =>
+    `    { Name = "${q(p.name)}", Url = "${q(p.url)}", Show = ${p.show}, IsJunkie = ${p.isJunkie}, Pinned = ${p.pinned} },`
+  ).join('\n');
+
+  let gameSupportStr = gameEntries.map(g => {
+    const keyStr = g.id && !isNaN(g.id) ? `[${g.id}]` : 'Universal';
+    return `    ${keyStr} = { Name = "${q(g.name||'Game')}", Free = "${q(g.free)}", Premium = "${q(g.premium)}" },`;
+  }).join('\n');
+  gameSupportStr += `\n    Universal = { Name = "Universal", Free = "", Premium = "" },`;
+
+  const socialsStr = socialsData.map(s =>
+    `    { Name = "${q(s.name)}", Icon = "rbxassetid://${s.assetId}", Link = "${q(s.link)}", Show = ${s.show}, Pinned = ${s.pinned} },`
+  ).join('\n');
+
+  const applinksStr = appLinksData.map(a =>
+    `    { Name = "${q(a.name)}", Icon = "rbxassetid://0", Link = "${q(a.link)}", Show = ${a.show}, Pinned = ${a.pinned} },`
+  ).join('\n');
+
+  const instrStr = instrRows.map(r =>
+    `    { Title = "${q(r.title)}", Body = "${q(r.body)}" },`
+  ).join('\n');
+
+  const clStr = clVersions.map(cv => {
+    const notesStr = cv.notes.map(n => `"${q(n)}"`).join(', ');
+    return `      { Version = "${q(cv.version)}", Date = "${q(cv.date)}", Tag = "${q(cv.tag)}", Notes = { ${notesStr} } },`;
+  }).join('\n');
+
+  const code =
+`getgenv().SCRIPT_KEY = nil
+
+local Junkie_Configs = {
+  UseJunkie       = true,
+  Junkie_Webhook  = "${q(webhook)}",
+  Service         = "${q(service)}",
+  Identifier      = "${q(ident)}",
+  Provider        = "${q(provider)}",
+  MaxKeyAttempts  = ${attempts},
+  Premium         = ${premium},
+  Providers = {
+${providersStr}
+  },
+  GameSupport = {
+${gameSupportStr}
+  },
+}
+
+local UI_Configs = {
+  Name                 = "${q(name)}",
+  Version              = "${q(ver)}",
+  Color                = Color3.fromRGB(${r}, ${g}, ${b}),
+  GradientAnimated     = ${gradient},
+  GradientAnimationSpeed = ${gradspeed},
+  BadgeText            = "${q(badge)}",
+  ShowOutline          = ${outline},
+  KeySystemLabel       = "${q(keylabel)}",
+  KeySystemPlaceholder = "${q(keyph)}",
+  ShowMemberCount      = ${members},
+  SnowEnabled          = ${snow},
+  SnowDensity          = 1.0,
+  SnowColor            = Color3.fromRGB(220, 235, 255),
+  SnowSize             = { Min = 3, Max = 7 },
+  GlassOpacity         = ${glass},
+  SlideInEnabled       = ${slidein},
+  BlurEnabled          = ${bluren},
+  BlurSize             = ${blur},
+  OverlayOpacity       = 0.65,
+  CloseOnSuccess       = ${closeok},
+  SuccessMessage       = "${q(success)}",
+  KeyFile              = "${q(keyfile)}",
+  Discord              = "${q(discord)}",
+  Socials = {
+${socialsStr}
+  },
+  AppLinks = {
+${applinksStr}
+  },
+  Instructions = {
+${instrStr}
+  },
+  Changelog = {
+    Show  = true,
+    Title = "What's New",
+    Versions = {
+${clStr}
+    },
+  },
+}
+
+local Config = {
+  Name=UI_Configs.Name, Version=UI_Configs.Version, Color=UI_Configs.Color,
+  GradientAnimated=UI_Configs.GradientAnimated,
+  GradientAnimationSpeed=UI_Configs.GradientAnimationSpeed,
+  BadgeText=UI_Configs.BadgeText, ShowOutline=UI_Configs.ShowOutline,
+  KeySystemLabel=UI_Configs.KeySystemLabel,
+  KeySystemPlaceholder=UI_Configs.KeySystemPlaceholder,
+  ShowMemberCount=UI_Configs.ShowMemberCount,
+  SnowEnabled=UI_Configs.SnowEnabled, SnowDensity=UI_Configs.SnowDensity,
+  SnowColor=UI_Configs.SnowColor, SnowSize=UI_Configs.SnowSize,
+  GlassOpacity=UI_Configs.GlassOpacity, SlideInEnabled=UI_Configs.SlideInEnabled,
+  BlurEnabled=UI_Configs.BlurEnabled, BlurSize=UI_Configs.BlurSize,
+  OverlayOpacity=UI_Configs.OverlayOpacity, CloseOnSuccess=UI_Configs.CloseOnSuccess,
+  SuccessMessage=UI_Configs.SuccessMessage, KeyFile=UI_Configs.KeyFile,
+  Discord=UI_Configs.Discord, Socials=UI_Configs.Socials,
+  AppLinks=UI_Configs.AppLinks, Instructions=UI_Configs.Instructions,
+  Changelog=UI_Configs.Changelog,
+  UseJunkie=Junkie_Configs.UseJunkie, Junkie_Webhook=Junkie_Configs.Junkie_Webhook,
+  Junkie={ Service=Junkie_Configs.Service, Identifier=Junkie_Configs.Identifier, Provider=Junkie_Configs.Provider },
+  Providers=Junkie_Configs.Providers, MaxKeyAttempts=Junkie_Configs.MaxKeyAttempts,
+  Premium=Junkie_Configs.Premium, GameSupport=Junkie_Configs.GameSupport,
+}
+
+local Hub
+pcall(function()
+  local src = game:HttpGet("")
+  if #src < 100 then return end
+  Hub = loadstring(src)()
+end)
+if type(Hub) ~= "table" then return end
+
+local autoLogin = TryAutoLogin()
+if not autoLogin then
+  pcall(function()
+    local hub = Hub.new(Config)
+    hub:Init()
+  end)
+end
+
+while not getgenv().SCRIPT_KEY do
+  task.wait(0.1)
+end
+
+return Hub`;
+
+  const pre = document.getElementById('pre-gen');
+  if (pre) pre.textContent = code;
+  const lnEl = document.getElementById('ln-gen');
+  if (lnEl) {
+    const lines = code.split('\n').length;
+    lnEl.innerHTML = Array.from({length:lines},(_,i)=>`<span>${i+1}</span>`).join('');
+  }
+}
+
+function resetGenerator() {
+  document.getElementById('gen-result').classList.remove('visible');
+  document.getElementById('gen-form').style.display = '';
+  lucide.createIcons();
+}
+
+function downloadGenerated(ext) {
+  const pre = document.getElementById('pre-gen');
+  const text = pre ? pre.innerText : '';
+  if (!text) return;
+  const fname = (v('g-name')||'config').replace(/\s+/g,'_').toLowerCase();
+  const blob = new Blob([text], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fname + '_config.' + ext;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Downloaded as .' + ext);
 }
 </script>
 </body>
